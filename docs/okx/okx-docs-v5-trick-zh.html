@@ -1,0 +1,1799 @@
+
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>欧易 API接入指南 | 欧易技术对接 | 欧易</title>
+    <meta name="description" content="欢迎来到欧易API接入指南,欧易技术对接。欧易是全球领先的比特币交易平台，使用银行级别的SSL加密和冷存储等技术，为用户提供安全稳定的数字资产服务。">
+    <meta name="keywords" content="欧易API接入指南,欧易技术对接">
+
+    <link rel="shortcut icon" href="https://static.coinall.ltd/cdn/assets/imgs/221/A73079733B3789DA.png" type="image/png">
+
+    <style media="screen">
+      .highlight table td { padding: 5px; }
+.highlight table pre { margin: 0; }
+.highlight .gh {
+  color: #999999;
+}
+.highlight .sr {
+  color: #f6aa11;
+}
+.highlight .go {
+  color: #888888;
+}
+.highlight .gp {
+  color: #555555;
+}
+.highlight .gs {
+}
+.highlight .gu {
+  color: #aaaaaa;
+}
+.highlight .nb {
+  color: #f6aa11;
+}
+.highlight .cm {
+  color: #75715e;
+}
+.highlight .cp {
+  color: #75715e;
+}
+.highlight .c1 {
+  color: #75715e;
+}
+.highlight .cs {
+  color: #75715e;
+}
+.highlight .c, .highlight .ch, .highlight .cd, .highlight .cpf {
+  color: #75715e;
+}
+.highlight .err {
+  color: #960050;
+}
+.highlight .gr {
+  color: #960050;
+}
+.highlight .gt {
+  color: #960050;
+}
+.highlight .gd {
+  color: #49483e;
+}
+.highlight .gi {
+  color: #49483e;
+}
+.highlight .ge {
+  color: #49483e;
+}
+.highlight .kc {
+  color: #66d9ef;
+}
+.highlight .kd {
+  color: #66d9ef;
+}
+.highlight .kr {
+  color: #66d9ef;
+}
+.highlight .no {
+  color: #66d9ef;
+}
+.highlight .kt {
+  color: #66d9ef;
+}
+.highlight .mf {
+  color: #ae81ff;
+}
+.highlight .mh {
+  color: #ae81ff;
+}
+.highlight .il {
+  color: #ae81ff;
+}
+.highlight .mi {
+  color: #ae81ff;
+}
+.highlight .mo {
+  color: #ae81ff;
+}
+.highlight .m, .highlight .mb, .highlight .mx {
+  color: #ae81ff;
+}
+.highlight .sc {
+  color: #ae81ff;
+}
+.highlight .se {
+  color: #ae81ff;
+}
+.highlight .ss {
+  color: #ae81ff;
+}
+.highlight .sd {
+  color: #e6db74;
+}
+.highlight .s2 {
+  color: #e6db74;
+}
+.highlight .sb {
+  color: #e6db74;
+}
+.highlight .sh {
+  color: #e6db74;
+}
+.highlight .si {
+  color: #e6db74;
+}
+.highlight .sx {
+  color: #e6db74;
+}
+.highlight .s1 {
+  color: #e6db74;
+}
+.highlight .s, .highlight .sa, .highlight .dl {
+  color: #e6db74;
+}
+.highlight .na {
+  color: #a6e22e;
+}
+.highlight .nc {
+  color: #a6e22e;
+}
+.highlight .nd {
+  color: #a6e22e;
+}
+.highlight .ne {
+  color: #a6e22e;
+}
+.highlight .nf, .highlight .fm {
+  color: #a6e22e;
+}
+.highlight .vc {
+  color: #ffffff;
+}
+.highlight .nn {
+  color: #ffffff;
+}
+.highlight .ni {
+  color: #ffffff;
+}
+.highlight .bp {
+  color: #ffffff;
+}
+.highlight .vg {
+  color: #ffffff;
+}
+.highlight .vi {
+  color: #ffffff;
+}
+.highlight .nv, .highlight .vm {
+  color: #ffffff;
+}
+.highlight .w {
+  color: #ffffff;
+}
+.highlight {
+  color: #ffffff;
+}
+.highlight .n, .highlight .py, .highlight .nx {
+  color: #ffffff;
+}
+.highlight .nl {
+  color: #f92672;
+}
+.highlight .ow {
+  color: #f92672;
+}
+.highlight .nt {
+  color: #f92672;
+}
+.highlight .k, .highlight .kv {
+  color: #f92672;
+}
+.highlight .kn {
+  color: #f92672;
+}
+.highlight .kp {
+  color: #f92672;
+}
+.highlight .o {
+  color: #f92672;
+}
+    </style>
+    <style media="print">
+      * {
+        -webkit-transition:none!important;
+        transition:none!important;
+      }
+      .highlight table td { padding: 5px; }
+.highlight table pre { margin: 0; }
+.highlight, .highlight .w {
+  color: #586e75;
+}
+.highlight .err {
+  color: #002b36;
+  background-color: #dc322f;
+}
+.highlight .c, .highlight .ch, .highlight .cd, .highlight .cm, .highlight .cpf, .highlight .c1, .highlight .cs {
+  color: #657b83;
+}
+.highlight .cp {
+  color: #b58900;
+}
+.highlight .nt {
+  color: #b58900;
+}
+.highlight .o, .highlight .ow {
+  color: #93a1a1;
+}
+.highlight .p, .highlight .pi {
+  color: #93a1a1;
+}
+.highlight .gi {
+  color: #859900;
+}
+.highlight .gd {
+  color: #dc322f;
+}
+.highlight .gh {
+  color: #268bd2;
+  background-color: #002b36;
+  font-weight: bold;
+}
+.highlight .k, .highlight .kn, .highlight .kp, .highlight .kr, .highlight .kv {
+  color: #6c71c4;
+}
+.highlight .kc {
+  color: #cb4b16;
+}
+.highlight .kt {
+  color: #cb4b16;
+}
+.highlight .kd {
+  color: #cb4b16;
+}
+.highlight .s, .highlight .sb, .highlight .sc, .highlight .dl, .highlight .sd, .highlight .s2, .highlight .sh, .highlight .sx, .highlight .s1 {
+  color: #859900;
+}
+.highlight .sa {
+  color: #6c71c4;
+}
+.highlight .sr {
+  color: #2aa198;
+}
+.highlight .si {
+  color: #d33682;
+}
+.highlight .se {
+  color: #d33682;
+}
+.highlight .nn {
+  color: #b58900;
+}
+.highlight .nc {
+  color: #b58900;
+}
+.highlight .no {
+  color: #b58900;
+}
+.highlight .na {
+  color: #268bd2;
+}
+.highlight .m, .highlight .mb, .highlight .mf, .highlight .mh, .highlight .mi, .highlight .il, .highlight .mo, .highlight .mx {
+  color: #859900;
+}
+.highlight .ss {
+  color: #859900;
+}
+    </style>
+    <link href="stylesheets/screen-a5d12b54.css" rel="stylesheet" media="screen" />
+    <link href="stylesheets/print-2731ee0a.css" rel="stylesheet" media="print" />
+      <script src="javascripts/all_nosearch-0bdd0505.js"></script>
+
+    <script>
+      var currentHref = window.location.href;
+      var pathname = window.location.pathname;
+      var pathArr = pathname.split('/').reverse();
+      var modules = ['zh', 'agent_zh', 'trick_zh', 'log_zh'];
+      var moduleType = pathArr[1];
+      var moduleIndex = modules.indexOf(moduleType);
+      var switchLanguage = true;
+
+      function sanitizePath(pathArr) {
+        pathArr = pathArr.filter(function(segment) { return segment !== '@'; });
+        var path = pathArr.join('/');
+        path = path.replace(/\/+/g, '/');
+        return path;
+      }
+
+      // Initialize when DOM is loaded
+      if (document.addEventListener) {
+        document.addEventListener('DOMContentLoaded', () => {
+          init(moduleIndex);
+        });
+      } else {
+        // Fallback for older browsers
+        window.attachEvent('onload', () => {
+          init(moduleIndex);
+        });
+      }
+
+      function changeHyperlink() {
+        if (switchLanguage) {
+          switchLanguage = false;
+          var hash = window.location.hash;
+          var newPath = pathname.replace("zh","en") + hash;
+          window.location.href = sanitizePath(newPath.split('/'));
+        }
+      }
+
+      function changeMenuLink(type) {
+        pathArr[1] = type;
+        window.location.href = sanitizePath(pathArr.reverse());
+      }
+    </script>
+    <style>
+        .content aside.notice:before {
+                content: '';
+                display: inline-block;
+                height: 16px;
+                width: 16px;
+                background-image: url("data:image/image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAACBVGfHAAAAD1BMVEUAAAAgX+wgYOsgYOsgX+zxKDX3AAAABHRSTlMAv4BAMM4GbAAAAIhJREFUKM+NkcsRgCAMRP0V4GgK0BkK8GABBum/JgdYFxQO5AL7CEtm6Rpr3EWXI9PifG0/7ewLToe60eBY0WaCYotJQL0ewnaN+OCNGQvfsAITWqRRJGzANYGJIPZemKYGJAdaAwaAz54AHKzHiQkccQAgRflMTpPoVERYD5kJKL9qgC6+sq0e+31Meuswx+MAAAAASUVORK5CYII=");
+                background-repeat: no-repeat;
+                background-size: auto 100%;
+                padding: 0;
+                margin-right: 7px;
+                vertical-align: text-bottom;
+              }
+          .content aside.warning:before {
+              content: '';
+              display: inline-block;
+              height: 16px;
+              width: 16px;
+              background-image: url("data:image/image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAACBVGfHAAAAD1BMVEUAAADjYGDjXl7jXV3jXl6rsL0UAAAABHRSTlMAQIC/o1TdDAAAAIpJREFUKM+dkd0NgCAMhAEdwL8BNHEAjQ7gz+0/k4HDFsML8Z7gS3twrSlW236u3Q7co94dgoRYRDURzAC2DcCVFBijJbWCQzrQWEgPCMTWKeDLVQoW70ng8LoOrCU4/wGarr2YVki0yMduHYlNPRiOJw1X86can8F3htWeQLMh52sQ4hc1Zass1ANrMkLgf7knqgAAAABJRU5ErkJggg==");
+              background-repeat: no-repeat;
+              background-size: auto 100%;
+              padding: 0;
+              margin-right: 7px;
+            vertical-align: text-bottom;
+            }
+            .toc-wrapper .search:before {
+                content: '';
+                height: 12px;
+                width: 12px;
+                background-image: url("data:image/image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgBAMAAACBVGfHAAAAD1BMVEUAAAD///////////////+PQt5oAAAABHRSTlMAgL9ARyeO/QAAAKpJREFUKM9lkdENwyAMRE3oAE3FAFFhABQxQEpu/5naXjGulfsyjztjZPkq7sBaZSoWfPS6/59JFDTAkQgg17gCqAQ3gOkAHASJVhadFzSw+mUW616wscVhz51MjoSaC4NjgE4gHsAA6yvwEd80ECRsE/DZpoNxRj96Ioj2uVGV+f1RLONiBwEzWLkJDTeoLEz1pJZQeK7BdvN49lxFpsVmx2kn24S3iFfKb13fLBtfa1iNAAAAAElFTkSuQmCC");
+              background-repeat: no-repeat;
+              background-size: auto 100%;
+              top: 19px
+            }
+        </style>
+  </head>
+
+  <body class="index" data-languages="[]">
+    <a href="#" id="nav-button">
+      <!--<span>
+        <img src="images/navbar-cad8cdcb.png" alt="Navbar">
+      </span>-->
+       <span>
+         导航
+         <img src="images/navbar-cad8cdcb.png" alt="" />
+       </span>
+    </a>
+
+    <header>
+      <div class="toc-left">
+        <a href="/">
+          <img src="images/logo-6cc61484.png" class="logo" alt="" />
+        </a>
+        <div class="toc-split-line"></div>
+        <ul class="toc-nav-list">
+          <li><a onclick= "javascript:changeMenuLink('zh')" href="javascript:void(0);">API接口</a></li>
+          <li><a onclick= "javascript:changeMenuLink('agent_zh')" href="javascript:void(0);">🔥 Agent</a></li>
+          <li><a onclick= "javascript:changeMenuLink('trick_zh')" href="javascript:void(0);">最佳实践</a></li>
+          <li><a onclick= "javascript:changeMenuLink('log_zh')" href="javascript:void(0);">更新日志</a></li>
+        </ul>
+        <select class="toc-nav-dropdown" onchange="javascript:changeMenuLink(options[selectedIndex].value)">
+          <option value="zh">API接口</option>
+          <option value="agent_zh">🔥 Agent</option>
+          <option value="trick_zh">最佳实践</option>
+          <option value="log_zh">更新日志</option>
+        </select>
+      </div>
+
+      <div class="switch-language">
+        <a onclick= "javascript:changeHyperlink()" class="toc-link" style="display: inline-block;" href="javascript:void(0);">English</a>
+      </div>
+    </header>
+    <div class="toc-wrapper">
+        <ul id="toc" class="toc-list-h1">
+            <li>
+              <a href="#instrument-configuration" class="toc-h1 toc-link" data-title="产品配置 ">产品配置 </a>
+            </li>
+            <li>
+              <a href="#market-data" class="toc-h1 toc-link" data-title="市场数据 ">市场数据 </a>
+            </li>
+            <li>
+              <a href="#configuring-accounts-and-sub-accounts" class="toc-h1 toc-link" data-title="配置账户和子账户 ">配置账户和子账户 </a>
+                <ul class="toc-list-h2">
+                    <li>
+                      <a href="#configuring-accounts-and-sub-accounts-account-config" class="toc-h2 toc-link" data-title="账户配置 ">账户配置 </a>
+                    </li>
+                    <li>
+                      <a href="#configuring-accounts-and-sub-accounts-account-mode" class="toc-h2 toc-link" data-title="账户模式 ">账户模式 </a>
+                    </li>
+                    <li>
+                      <a href="#configuring-accounts-and-sub-accounts-position" class="toc-h2 toc-link" data-title="持仓模式 ">持仓模式 </a>
+                    </li>
+                    <li>
+                      <a href="#configuring-accounts-and-sub-accounts-auto-borrow" class="toc-h2 toc-link" data-title="自动借币 ">自动借币 </a>
+                    </li>
+                    <li>
+                      <a href="#configuring-accounts-and-sub-accounts-option-greeks-type" class="toc-h2 toc-link" data-title="期权希腊值 PA/BS ">期权希腊值 PA/BS </a>
+                    </li>
+                </ul>
+            </li>
+            <li>
+              <a href="#cross-isolated-margin-mode" class="toc-h1 toc-link" data-title="全仓/逐仓保证金模式 ">全仓/逐仓保证金模式 </a>
+                <ul class="toc-list-h2">
+                    <li>
+                      <a href="#cross-isolated-margin-mode-getting-leverage" class="toc-h2 toc-link" data-title="获取杠杆倍数 ">获取杠杆倍数 </a>
+                    </li>
+                    <li>
+                      <a href="#cross-isolated-margin-mode-setting-leverage" class="toc-h2 toc-link" data-title="设置杠杆倍数 ">设置杠杆倍数 </a>
+                    </li>
+                </ul>
+            </li>
+            <li>
+              <a href="#order-management" class="toc-h1 toc-link" data-title="订单管理 ">订单管理 </a>
+                <ul class="toc-list-h2">
+                    <li>
+                      <a href="#order-management-trade-mode" class="toc-h2 toc-link" data-title="交易模式 ">交易模式 </a>
+                    </li>
+                    <li>
+                      <a href="#order-management-subscribing-to-the-orders-channel" class="toc-h2 toc-link" data-title="订阅订单频道 ">订阅订单频道 </a>
+                    </li>
+                    <li>
+                      <a href="#order-management-placing-an-order" class="toc-h2 toc-link" data-title="下单 ">下单 </a>
+                        <ul class="toc-list-h3">
+                            <li>
+                              <a href="#order-management-placing-an-order-rest-api" class="toc-h3 toc-link" data-title="REST API ">REST API </a>
+                            </li>
+                            <li>
+                              <a href="#order-management-placing-an-order-websocket" class="toc-h3 toc-link" data-title="WebSocket ">WebSocket </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                      <a href="#order-management-checking-order-state" class="toc-h2 toc-link" data-title="检查订单状态 ">检查订单状态 </a>
+                    </li>
+                    <li>
+                      <a href="#order-management-amending-an-order" class="toc-h2 toc-link" data-title="改单 ">改单 </a>
+                    </li>
+                    <li>
+                      <a href="#order-management-canceling-an-order" class="toc-h2 toc-link" data-title="撤单 ">撤单 </a>
+                    </li>
+                    <li>
+                      <a href="#order-management-batch-operations" class="toc-h2 toc-link" data-title="批量操作 ">批量操作 </a>
+                    </li>
+                    <li>
+                      <a href="#order-management-order-timestamp" class="toc-h2 toc-link" data-title="订单时间戳 ">订单时间戳 </a>
+                    </li>
+                    <li>
+                      <a href="#order-management-pagination" class="toc-h2 toc-link" data-title="分页 ">分页 </a>
+                    </li>
+                    <li>
+                      <a href="#order-management-self-trade-prevention" class="toc-h2 toc-link" data-title="自成交保护 ">自成交保护 </a>
+                        <ul class="toc-list-h3">
+                            <li>
+                              <a href="#order-management-self-trade-prevention-stp-modes" class="toc-h3 toc-link" data-title="自成交保护模式 ">自成交保护模式 </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li>
+              <a href="#trading-account-and-positions-information" class="toc-h1 toc-link" data-title="交易账户和持仓 ">交易账户和持仓 </a>
+                <ul class="toc-list-h2">
+                    <li>
+                      <a href="#trading-account-and-positions-information-account" class="toc-h2 toc-link" data-title="账户 ">账户 </a>
+                        <ul class="toc-list-h3">
+                            <li>
+                              <a href="#trading-account-and-positions-information-account-websocket-subscription" class="toc-h3 toc-link" data-title="WebSocket 订阅 ">WebSocket 订阅 </a>
+                            </li>
+                            <li>
+                              <a href="#trading-account-and-positions-information-account-initial-snapshot" class="toc-h3 toc-link" data-title="首次订阅全量数据 ">首次订阅全量数据 </a>
+                            </li>
+                            <li>
+                              <a href="#trading-account-and-positions-information-account-subsequent-updates" class="toc-h3 toc-link" data-title="后续推送 ">后续推送 </a>
+                            </li>
+                            <li>
+                              <a href="#trading-account-and-positions-information-account-rest-api" class="toc-h3 toc-link" data-title="REST API ">REST API </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                      <a href="#trading-account-and-positions-information-maximum-available-tradable-amount" class="toc-h2 toc-link" data-title="最大可用数量 ">最大可用数量 </a>
+                    </li>
+                    <li>
+                      <a href="#trading-account-and-positions-information-maximum-withdrawal-amount" class="toc-h2 toc-link" data-title="最大可转余额 ">最大可转余额 </a>
+                    </li>
+                    <li>
+                      <a href="#trading-account-and-positions-information-balance-and-position" class="toc-h2 toc-link" data-title="余额和持仓 ">余额和持仓 </a>
+                    </li>
+                    <li>
+                      <a href="#trading-account-and-positions-information-positions" class="toc-h2 toc-link" data-title="持仓 ">持仓 </a>
+                        <ul class="toc-list-h3">
+                            <li>
+                              <a href="#trading-account-and-positions-information-positions-websocket-subscription" class="toc-h3 toc-link" data-title="WebSocket 订阅 ">WebSocket 订阅 </a>
+                            </li>
+                            <li>
+                              <a href="#trading-account-and-positions-information-positions-initial-snapshot" class="toc-h3 toc-link" data-title="首次订阅全量数据 ">首次订阅全量数据 </a>
+                            </li>
+                            <li>
+                              <a href="#trading-account-and-positions-information-positions-subsequent-updates" class="toc-h3 toc-link" data-title="后续推送 ">后续推送 </a>
+                            </li>
+                            <li>
+                              <a href="#trading-account-and-positions-information-positions-position-id" class="toc-h3 toc-link" data-title="持仓 ID ">持仓 ID </a>
+                            </li>
+                            <li>
+                              <a href="#trading-account-and-positions-information-positions-rest-api" class="toc-h3 toc-link" data-title="REST API ">REST API </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                      <a href="#trading-account-and-positions-information-reconciliation-between-fill-and-positions" class="toc-h2 toc-link" data-title="订单成交推送与持仓的对账 ">订单成交推送与持仓的对账 </a>
+                    </li>
+                </ul>
+            </li>
+            <li>
+              <a href="#identifiers" class="toc-h1 toc-link" data-title="标识符 ">标识符 </a>
+            </li>
+            <li>
+              <a href="#system-status" class="toc-h1 toc-link" data-title="系统状态 ">系统状态 </a>
+            </li>
+        </ul>
+    </div>
+    <div class="page-wrapper">
+        <div class="dark-box"></div>
+        <div class="content">
+          <h1 id='instrument-configuration'>产品配置 </h1>
+<p>用户可以通过 <a href="/docs-v5/zh/#public-data-rest-api-get-instruments"><code>GET /api/v5/public/instruments</code></a> 获取交易所的产品配置。</p>
+
+<p>后续的产品更新，例如最小变动价位变化、新上市，将通过websocket <a href="/docs-v5/zh/#public-data-websocket-instruments-channel"><code>产品</code></a> 频道发布。</p>
+<h1 id='market-data'>市场数据 </h1>
+<p>用户能够从websocket频道接收实时的市场数据更新。</p>
+
+<p><code>bbo-tbt</code>和<code>books5</code>是每10毫秒和100毫秒发布一次的深度快照。当订单簿没有变化时，系统不会发送新的快照。</p>
+
+<p><code>books</code>、<code>books-l2-tbt</code>和<code>books50-l2-tbt</code>是增量订单簿频道，<code>books</code>每100毫秒发布订单簿的变化，<code>books-l2-tbt</code>和<code>books50-l2-tbt</code>每10毫秒发布订单簿的变化。为使用<code>books-l2-tbt</code>和<code>books50-l2-tbt</code>，用户需要在订阅之前登录，该功能分别限制VIP5或VIP4以上用户使用。</p>
+
+<p>在系统内部，订单簿数据每10毫秒被创建一次，并根据用户订阅的频道发送相关数据。用户从所有websocket连接和频道接收到的订单簿数据都是相同的。</p>
+
+<p>如果深度在间隔期间发生了如A-&gt;B-&gt;A一样的改变，则不会发送更新。如果订单簿长时间没有更新，快照频道会重推订单簿数据，增量订单簿频道会推送没有更新的信息，以通知用户连接仍处于活动状态。</p>
+<h1 id='configuring-accounts-and-sub-accounts'>配置账户和子账户 </h1>
+<p>创建子账户和其API密钥后，用户可以在交易之前通过API配置主账户和子账户。</p>
+<h2 id='configuring-accounts-and-sub-accounts-account-config'>账户配置 </h2>
+<p>用户可以通过以下的 REST API 查看当前账户/子账户的配置：</p>
+
+<p><a href="/docs-v5/zh/#trading-account-rest-api-get-account-configuration"><code>GET /api/v5/account/config</code></a>.</p>
+
+<p>API 会返回账户模式、持仓模式、自动借币设置、期权希腊值PA/BS以及许多其他与账户相关的信息。</p>
+<h2 id='configuring-accounts-and-sub-accounts-account-mode'>账户模式 </h2>
+<p>交易账户交易系统提供四个账户模式，分别为现货模式、合约模式、跨币种保证金模式以及组合保证金模式。</p>
+
+<p>更改账户模式仅限于在网页或手机app上进行。</p>
+<h2 id='configuring-accounts-and-sub-accounts-position'>持仓模式 </h2>
+<p>交易所目前支持两种持仓模式。</p>
+
+<table><thead>
+<tr>
+<th style="text-align: left"></th>
+<th style="text-align: left"></th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: left">买卖模式</td>
+<td style="text-align: left">只可持有开多或开空仓位。交易所会根据您所指定的持仓数量自动开/平仓</td>
+</tr>
+<tr>
+<td style="text-align: left">开平仓模式</td>
+<td style="text-align: left">可同时持有开多仓位和开空仓位</td>
+</tr>
+</tbody></table>
+
+<p>用户可以通过以下的 REST API 设置持仓模式（设置前需平掉所有仓位和没有挂单）：</p>
+
+<p><a href="/docs-v5/zh/#trading-account-rest-api-set-position-mode"><code>POST /api/v5/account/set-position-mode</code></a></p>
+<h2 id='configuring-accounts-and-sub-accounts-auto-borrow'>自动借币 </h2>
+<p>自动借币仅适用于跨币种保证金模式及组合保证金模式，且只限于在网页上打开或关闭。</p>
+
+<p>为偿还负债，交易所可能会自动转换其他货币的可用余额。风险指标可以从 <a href="/docs-v5/zh/#trading-account-rest-api-get-balance"><code>GET /api/v5/account/balance</code></a> 以及 WS <a href="/docs-v5/zh/#trading-account-websocket-account-channel"><code>账户</code></a> 端点的<code>twap</code>字段中找到。</p>
+<h2 id='configuring-accounts-and-sub-accounts-option-greeks-type'>期权希腊值 PA/BS </h2>
+<p>用户可以通过以下的 REST API 设置期权希腊值 PA/BS：</p>
+
+<p><a href="/docs-v5/zh/#trading-account-rest-api-set-greeks-pa-bs"><code>POST /api/v5/account/set-greeks</code></a></p>
+<h1 id='cross-isolated-margin-mode'>全仓/逐仓保证金模式 </h1>
+<p>交易账户交易系统的全仓/逐仓设置更为弹性，用户可以同时以全仓和逐仓交易同一产品。</p>
+
+<p>因此，API并没有提供设置不同仓位保证金模式的功能。取而代之，用户需要在下单时使用<code>tdMode</code>字段指定该订单的保证金模式（交易模式）。</p>
+<h2 id='cross-isolated-margin-mode-getting-leverage'>获取杠杆倍数 </h2>
+<p>用户可以通过以下的 REST API 获取杠杆倍数：</p>
+
+<p><a href="/docs-v5/zh/#trading-account-rest-api-get-leverage"><code>GET /api/v5/account/leverage-info</code></a></p>
+
+<p>目前杠杆倍数没有全局设置，同一产品可以有几种杠杆倍数的设置场景。</p>
+
+<p>币币杠杆：</p>
+
+<table>
+  <tbody>
+      <tr>
+      <th>账户模式</th>
+      <th>保证金模式</th>
+      <th>层面</th>
+    </tr>
+    <tr>
+      <td rowspan="2">现货模式</td>
+      <td>全仓</td>
+      <td>产品(币对)</td>
+    </tr>
+    <tr>
+      <td>逐仓</td>
+      <td>产品(币对)</td>
+    </tr>
+    <tr>
+      <td rowspan="2">合约模式</td>
+      <td>全仓</td>
+      <td>产品(币对)</td>
+    </tr>
+    <tr>
+      <td>逐仓</td>
+      <td>产品(币对)</td>
+    </tr>
+    <tr>
+      <td rowspan="2">跨币种保证金模式</td>
+      <td>全仓</td>
+      <td>币种</td>
+    </tr>
+    <tr>
+      <td>逐仓</td>
+      <td>产品(币对)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>其他产品类型：</p>
+
+<table>
+  <tbody>
+      <tr>
+      <th>持仓模式</th>
+      <th>产品类型</th>
+      <th>保证金模式</th>
+      <th>层面</th>
+    </tr>
+    <tr>
+      <td rowspan="4">买卖模式</td>
+      <td rowspan="2">交割</td>
+      <td>全仓</td>
+      <td>交易品种</td>
+    </tr>
+    <tr>
+      <td>逐仓</td>
+      <td>交易品种</td>
+    </tr>
+    <tr>
+      <td rowspan="2">永续</td>
+      <td>全仓</td>
+      <td>交易品种</td>
+    </tr>
+    <tr>
+      <td>逐仓</td>
+      <td>交易品种</td>
+    </tr>
+    <tr>
+      <td rowspan="4">开平仓模式</td>
+      <td rowspan="2">交割</td>
+      <td>全仓</td>
+      <td>交易品种</td>
+    </tr>
+    <tr>
+      <td>逐仓</td>
+      <td>交易品种 + 持仓方向</td>
+    </tr>
+    <tr>
+      <td rowspan="2">永续</td>
+      <td>全仓</td>
+      <td>交易品种</td>
+    </tr>
+    <tr>
+      <td>逐仓</td>
+      <td>交易品种 + 持仓方向</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id='cross-isolated-margin-mode-setting-leverage'>设置杠杆倍数 </h2>
+<p>在获取杠杆倍数之后，用户可根据需要进行设置：</p>
+
+<p><a href="/docs-v5/zh/#trading-account-rest-api-set-leverage"><code>POST /api/v5/account/set-leverage</code></a></p>
+
+<p>用户可以运用上述两个API接口，在交易前预先设置每个产品的杠杆倍数。</p>
+
+<p>示例：</p>
+
+<p>假设我们有以下的设置和需求：</p>
+
+<ul>
+<li>账户模式：跨币种保证金</li>
+<li>持仓模式：买卖模式</li>
+<li>需要设置杠杆倍数为 3.0 的产品：
+
+<ul>
+<li>BTC-USDT、EOS-USDT、LTC-BTC、LTC-USDT</li>
+<li>BTC-USD-210319、BTC-USD-210326、BTC-USD-210625</li>
+<li>BTC-USD-SWAP</li>
+</ul></li>
+<li>以上产品只使用全仓保证金模式</li>
+</ul>
+
+<p>币币/币币杠杆的设置层面为币种，用户可以截取币种去逐一设置，即<code>BTC</code>、<code>USDT</code>、<code>EOS</code>和<code>LTC</code>。</p>
+
+<p>设置<code>BTC</code>币种杠杆倍数为 3.0 的请求体示例（适用于卖出<code>BTC-USDT</code>和买入<code>LTC-BTC</code>）：</p>
+
+<table><tbody><tr><td>{<br>&nbsp;&nbsp;"lever": "3.0",<br>&nbsp;&nbsp;"mgnMode": "cross",<br>&nbsp;&nbsp;"ccy": "BTC"<br>}</td></tr></tbody></table>
+
+<p>设置 <code>USDT</code>、<code>EOS</code> 和 <code>LTC</code> 的请求体也很类似，不在此一一列举。</p>
+
+<p>下一步就是设置<code>BTC-USD-210319</code>、<code>BTC-USD-210326</code>和<code>BTC-USD-210625</code>的杠杆倍数。 </p>
+
+<p>因为这三个产品都有共同的交易品种（即<code>BTC-USD</code>），用户只需在这三个产品中选其一设置杠杆倍数。</p>
+
+<table><tbody><tr><td>{<br>&nbsp;&nbsp;"lever": "3.0",<br>&nbsp;&nbsp;"mgnMode": "cross",<br>&nbsp;&nbsp;"instId": "BTC-USD-210326"<br>}</td></tr></tbody></table>
+
+<p>最后，用户需要设置<code>BTC-USD-SWAP</code>的杠杆倍数。</p>
+
+<p>虽然交易品种和以上的交割一样为<code>BTC-USD</code>，但交割和永续的杠杆倍数设置是分开独立的，用户仍需要发送以下请去设置：</p>
+
+<table><tbody><tr><td>{<br>&nbsp;&nbsp;"lever": "3.0",<br>&nbsp;&nbsp;"mgnMode": "cross",<br>&nbsp;&nbsp;"instId": "BTC-USD-SWAP"<br>}</td></tr></tbody></table>
+
+<p>在发送了以上共 6 个 API REST 请求后，这 8 个产品杠杆倍数的设置便完成了。</p>
+<h1 id='order-management'>订单管理 </h1><h2 id='order-management-trade-mode'>交易模式 </h2>
+<p>交易账户交易系统的全仓/逐仓设置更为弹性，用户可以同时以全仓和逐仓交易同一产品。因此，用户需要在下单时指定该订单的交易模式（<code>tdMode</code>字段）。</p>
+
+<p>各种情景下<code>tdMode</code>所需的值：</p>
+
+<table>
+  <tbody>
+    <tr>
+      <th>持仓模式</th>
+      <th>产品类型</th>
+      <th>保证金模式</th>
+      <th>交易模式(tdMode)</th>
+    </tr>
+    <tr>
+      <td rowspan="2">现货模式</td>
+      <td>币币</td>
+      <td>(N/A)</td>
+      <td>cash</td>
+    </tr>
+    <tr>
+      <td>期权</td>
+      <td>(N/A)</td>
+      <td>cash</td>
+    </tr>
+    <tr>
+      <td rowspan="5">合约模式</td>
+      <td>币币</td>
+      <td>(N/A)</td>
+      <td>cash</td>
+    </tr>
+    <tr>
+      <td rowspan="2">币币杠杆</td>
+      <td>全仓</td>
+      <td>cross</td>
+    </tr>
+    <tr>
+      <td>逐仓</td>
+      <td>isolated</td>
+    </tr>
+     <tr>
+      <td rowspan="2">交割/永续/期权</td>
+      <td>全仓</td>
+      <td>cross</td>
+    </tr>
+    <tr>
+      <td>逐仓</td>
+      <td>isolated</td>
+    </tr>
+    <tr>
+      <td rowspan="4">跨币种保证金</td>
+      <td>币币/币币杠杆</td>
+      <td>全仓</td>
+      <td>cross</td>
+    </tr>
+    <tr>
+      <td>币币杠杆</td>
+      <td>逐仓</td>
+      <td>isolated</td>
+    </tr>
+    <tr>
+      <td rowspan="2">交割/永续/期权</td>
+      <td>全仓</td>
+      <td>cross</td>
+    </tr>
+    <tr>
+      <td>逐仓</td>
+      <td>isolated</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><b>示例</b></p>
+
+<p>假设我们有以下的设置和订单需求：</p>
+
+<ul>
+<li>  账户模式：跨币种保证金</li>
+<li>  持仓模式：买卖模式</li>
+<li>  产品：BTC-USDT-SWAP</li>
+<li>  保证金模式：全仓</li>
+<li>  订单方向：买入（开多）</li>
+<li>  订单类型：限价单</li>
+<li>  委托价格：50,912.4 USDT</li>
+<li>  委托数量：1 张</li>
+</ul>
+
+<p>查找上表得知<code>tdMode</code>字段应填上<code>cross</code>。</p>
+<h2 id='order-management-subscribing-to-the-orders-channel'>订阅订单频道 </h2>
+<p>下单前，用户应先使用 WebSocket 订阅 <a href="/docs-v5/zh/#order-book-trading-trade-ws-order-channel"><code>订单</code></a> 频道，这样才能够监察订单状态（如等待成交、完全成交）和作出相应的操作（如在完全成交后下新单）。</p>
+
+<p>订单频道提供多种维度的订阅。要订阅以上 BTC-USDT-SWAP 订单的数据，用户可在连接到和登入私有 WebSocket 后，传送下表任一请求：</p>
+
+<table>
+    <tbody>
+        <tr>
+            <td></td>
+            <td><strong>产品类型</strong></td>
+            <td><strong>产品类型 + 交易品种</strong><strong><br></strong><strong>(仅限衍生产品)</strong>
+            </td>
+            <td><strong>产品类型 + 产品 ID</strong></td>
+        </tr>
+        <tr>
+            <td>请求</td>
+            <td>{<br>&nbsp;&nbsp;"op": "subscribe",<br>&nbsp;&nbsp;"args":
+                [<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"channel":
+                "orders",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instType":
+                "SWAP"<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;]<br>}</td>
+            <td>{<br>&nbsp;&nbsp;"op": "subscribe",<br>&nbsp;&nbsp;"args":
+                [<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"channel":
+                "orders",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instType":
+                "SWAP",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instFamily":
+                "BTC-USDT"<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;]<br>}</td>
+            <td>{<br>&nbsp;&nbsp;"op": "subscribe",<br>&nbsp;&nbsp;"args":
+                [<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"channel":
+                "orders",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instType":
+                "SWAP",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instId":
+                "BTC-USDT-SWAP"<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;]<br>}</td>
+        </tr>
+        <tr>
+            <td>成功返回</td>
+            <td>{<br>&nbsp;&nbsp;"event": "subscribe",<br>&nbsp;&nbsp;"arg": {<br>&nbsp;&nbsp;&nbsp;&nbsp;"channel":
+                "orders",<br>&nbsp;&nbsp;&nbsp;&nbsp;"instType": "SWAP"<br>&nbsp;&nbsp;}<br>}</td>
+            <td>{<br>&nbsp;&nbsp;"event": "subscribe",<br>&nbsp;&nbsp;"args":
+                [<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"channel":
+                "orders",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instType":
+                "SWAP",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instFamily":
+                "BTC-USDT"<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;]<br>}</td>
+            <td>{<br>&nbsp;&nbsp;"event": "subscribe",<br>&nbsp;&nbsp;"args":
+                [<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"channel":
+                "orders",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instType":
+                "SWAP",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instId":
+                "BTC-USDT-SWAP"<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;]<br>}</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>用户亦可以把<code>instType</code>参数填上<code>ANY</code>，一次性订阅所有产品类型的订单更新。</p>
+
+<p>注：订单频道不设首次订阅全量数据推送，只会在订单状态改变时（如由等待成交到撤单成功）推送该订单的更新。</p>
+
+<p>换言之，用户无法在订阅订单频道时得知当时的订单数据。要获取订阅订单频道前未完成订单的数据，可通过以下的 REST API 查看：</p>
+
+<p><a href="/docs-v5/zh/#order-book-trading-trade-get-order-list"><code>GET /api/v5/trade/orders-pending</code></a></p>
+<h2 id='order-management-placing-an-order'>下单 </h2>
+<p>为了系统能够更容易地识别订单，我们建议用户在下单时填上客户自定义订单 ID（<code>clOrdId</code>字段）。客户自定义订单 ID 需由字母与数字组成，区分大小写，最长 32 位。</p>
+
+<p><code>cloOrdId</code>唯一性检查仅适用于所有挂单，但我们扔推荐用户始终使用唯一的<code>cloOrdId</code>以便于故障排除等工作。</p>
+
+<p>此示例我们会在<code>clOrdId</code>字段填上 <code>testBTC0123</code>。</p>
+
+<p>在订阅订单频道后，用户便可以准备 <code>BTC-USDT-SWAP</code> 订单的下单。</p>
+
+<p>用户可通过 REST 和 WebSocket 去下单。</p>
+<h3 id='order-management-placing-an-order-rest-api'>REST API </h3>
+<p>用户可以通过以下的 REST API 下单，服务器收到请求后会返回订单 ID（<code>ordId</code>）。</p>
+
+<table>
+    <tbody>
+        <tr>
+            <td>REST API</td>
+            <td>POST /api/v5/trade/order</td>
+        </tr>
+        <tr>
+            <td>请求体</td>
+            <td>{<br>&nbsp;&nbsp;"instId": "BTC-USDT-SWAP",<br>&nbsp;&nbsp;"tdMode": "cross",<br>&nbsp;&nbsp;"clOrdId":
+                "testBTC0123",<br>&nbsp;&nbsp;"side": "buy",<br>&nbsp;&nbsp;"ordType": "limit",<br>&nbsp;&nbsp;"px":
+                "50912.4",<br>&nbsp;&nbsp;"sz": "1"<br>}</td>
+        </tr>
+        <tr>
+            <td>成功返回</td>
+            <td>{<br>&nbsp;&nbsp;"code": "0",<br>&nbsp;&nbsp;"msg": "",<br>&nbsp;&nbsp;"data":
+                [<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"clOrdId":
+                "testBTC0123",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"ordId":
+                "288981657420439575",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"tag":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"sCode": "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"sMsg":
+                ""<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;]<br>}</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>注：这只代表交易所已成功收取请求，并把订单 ID 指派到该订单。此时订单有可能还没到撮合系统，用户需要进一步检查订单状态去确认。</p>
+<h3 id='order-management-placing-an-order-websocket'>WebSocket </h3>
+<p>用户亦可以通过 WebSocket 下单，理论上比 REST 更有效率及节约资源。</p>
+
+<p>由于 WebSocket 操作为异步通信，用户需要提供信息 ID（<code>id</code>）以便识别其返回。</p>
+
+<p>于私有 WebSocket 登录后，传送以下 WebSocket 信息：</p>
+
+<table>
+    <tbody>
+        <tr>
+            <td>{<br>&nbsp;&nbsp;"id": "NEWtestBTC0123",<br>&nbsp;&nbsp;"op": "order",<br>&nbsp;&nbsp;"args":
+                [<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instId":
+                "BTC-USDT-SWAP",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"tdMode":
+                "cross",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"clOrdId":
+                "testBTC0123",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"side":
+                "buy",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"ordType":
+                "limit",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"px":
+                "50912.4",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"sz":
+                "1"<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;]<br>}</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>服务器收到请求后，会连同信息 ID（即 NEWtestBTC012）返回结果，并附上交易所指派的订单 ID（<code>ordId</code>）：</p>
+
+<table>
+    <tbody>
+        <tr>
+            <td>{<br>&nbsp;&nbsp;"id": "NEWtestBTC0123",<br>&nbsp;&nbsp;"op": "order",<br>&nbsp;&nbsp;"data":
+                [<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"clOrdId":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"ordId":
+                "288981657420439575",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"tag":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"sCode": "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"sMsg":
+                ""<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;],<br>&nbsp;&nbsp;"code": "0",<br>&nbsp;&nbsp;"msg":
+                ""<br>}</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>注：这只代表交易所已成功收取请求，并把订单 ID 指派到该订单。此时订单有可能还没到撮合系统，用户需要进一步检查订单状态去确认。</p>
+<h2 id='order-management-checking-order-state'>检查订单状态 </h2>
+<p>下单后，若订单未返回任何错误 (<code>&quot;sCode&quot;: &quot;0&quot;</code>)。用户会在 WebSocket 订单频道收到该订单状态为<code>live</code>的信息。</p>
+
+<p>信息示例（以产品类型 + 交易品种维度订阅订单频道）：</p>
+
+<table>
+    <tbody>
+        <tr>
+            <td>{<br>&nbsp;&nbsp;"arg": {<br>&nbsp;&nbsp;&nbsp;&nbsp;"channel":
+                "orders",<br>&nbsp;&nbsp;&nbsp;&nbsp;"instType": "SWAP",<br>&nbsp;&nbsp;&nbsp;&nbsp;"instFamily":
+                "BTC-USDT"<br>&nbsp;&nbsp;},<br>&nbsp;&nbsp;"data":
+                [<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"accFillSz":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"amendResult":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"avgPx": "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"cTime":
+                "1615170596148",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"category":
+                "normal",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"ccy":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"clOrdId":
+                "testBTC0123",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"code":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"fee": "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"feeCcy":
+                "USDT",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"fillPx":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"fillSz":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"fillTime":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instId":
+                "BTC-USDT-SWAP",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instType":
+                "SWAP",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"lever":
+                "3",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"msg": "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"ordId":
+                "288981657420439575",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"ordType":
+                "limit",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"pnl":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"posSide":
+                "net",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"px":
+                "50912.4",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"rebate":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"rebateCcy":
+                "USDT",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"reqId":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"side":
+                "buy",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"slOrdPx":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"slTriggerPx":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"state": "live",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"sz":
+                "1",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"tag": "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"tdMode":
+                "cross",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"tpOrdPx":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"tpTriggerPx":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"tradeId":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"uTime":
+                "1615170596148"<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;]<br>}</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>订单完全成交后，用户会收到以下的推送信息示例，订单状态变更为<code>filled</code>，并填上其他有关成交的字段。</p>
+
+<p>如果订单部分或全部成交，websocket将分别返回 <code>state</code> = <code>partially_filled</code> and <code>filled</code>。</p>
+
+<p>对于立即成交并取消剩余（IOC）、全部成交或立即取消（FOK）以及仅挂单的订单（post only），这些订单可能会被撮合引擎拒绝，用户将收到<code>live</code>然后是<code>canceled</code>的状态。</p>
+
+<p>用户订单可能会由于各种原因被系统取消，例如清算或自成交。用户可以参考 <code>cancelSource</code> 以确定订单被取消的原因。</p>
+
+<p>一个订单的终止状态为<code>canceled</code>或<code>filled</code>。</p>
+
+<p>订单的每一笔成交都会被系统赋予一个成交 ID (<code>tradeId</code>)，用于与持仓对账。</p>
+
+<table>
+    <tbody>
+        <tr>
+            <td>{<br>&nbsp;&nbsp;"arg": {<br>&nbsp;&nbsp;&nbsp;&nbsp;"channel":
+                "orders",<br>&nbsp;&nbsp;&nbsp;&nbsp;"instType": "SWAP",<br>&nbsp;&nbsp;&nbsp;&nbsp;"instFamily":
+                "BTC-USDT"<br>&nbsp;&nbsp;},<br>&nbsp;&nbsp;"data":
+                [<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"accFillSz":
+                "1",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"amendResult":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"avgPx":
+                "50912.4",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"cTime":
+                "1615170596148",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"category":
+                "normal",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"ccy":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"clOrdId":
+                "testBTC0123",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"code":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"fee":
+                "-0.1018248",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"feeCcy":
+                "USDT",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"fillPx":
+                "50912.4",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"fillSz":
+                "1",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"fillTime":
+                "1615170598021",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instId":
+                "BTC-USDT-SWAP",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instType":
+                "SWAP",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"lever":
+                "3",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"msg": "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"ordId":
+                "288981657420439575",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"ordType":
+                "limit",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"pnl":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"posSide":
+                "net",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"px":
+                "50912.4",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"rebate":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"rebateCcy":
+                "USDT",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"reqId":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"side":
+                "buy",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"slOrdPx":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"slTriggerPx":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"state":
+                "filled",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"sz":
+                "1",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"tag": "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"tdMode":
+                "cross",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"tpOrdPx":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"tpTriggerPx":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"tradeId":
+                "60477021",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"uTime":
+                "1615170598022"<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;]<br>}</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>可能的订单状态：</p>
+
+<ol>
+<li>在入口处被拒绝，<code>sCode</code>不为零，websocket订单频道无更新推送</li>
+<li>下单并立即全部成交： <code>live</code> -&gt; <code>filled</code></li>
+<li>下单并立即通过多笔交易成交： <code>live</code> -&gt; <code>partially_filled</code> -&gt; ... -&gt; <code>filled</code></li>
+<li>下单但立即被撮合引擎取消（如 IOC、FOK、仅挂单）： <code>live</code> -&gt; <code>canceled</code> （取消原因可从 <code>cancelSource</code> 查询）</li>
+<li>下单为 IOC，部分成交后因价格深度不足而被系统取消： <code>live</code> -&gt; <code>partially_filled</code> -&gt; <code>canceled</code></li>
+</ol>
+<h2 id='order-management-amending-an-order'>改单 </h2>
+<p>改单接口支持所有产品类型的改单，允许用户修改订单的价格（<code>newPx</code>字段）和/或数量（<code>newSz</code>字段）。另外 API 也提供<code>cxlOnFail</code>参数，设置订单修改失败时自动撤单的操作。</p>
+
+<p>REST:</p>
+
+<p><a href="/docs-v5/zh/#order-book-trading-trade-post-amend-order"><code>POST /api/v5/trade/amend-order</code></a></p>
+
+<p>WebSocket 业务操作请求参数：</p>
+
+<p><a href="/docs-v5/zh/#order-book-trading-trade-ws-amend-order"><code>&quot;op&quot;: &quot;amend-order&quot;</code></a></p>
+
+<p>与下单相似，用户应会收到服务器相应 REST / WebSocket 的成功返回，然后于 WebSocket 订单频道收到已填上<code>amendResult</code>字段的订单推送更新。</p>
+
+<p>注：订单完全成交或撤单已成功时不能改单。</p>
+
+<p>成功响应仅表示交易所已收到该请求，用户应参考websocket订单频道以进行确认。</p>
+<h2 id='order-management-canceling-an-order'>撤单 </h2>
+<p>用户可以以类似的方式，通过 REST 或 WebSocket 撤单。</p>
+
+<p>REST:</p>
+
+<p><a href="/docs-v5/zh/#order-book-trading-trade-post-cancel-order"><code>POST /api/v5/trade/cancel-order</code></a></p>
+
+<p>WebSocket 业务操作请求参数：</p>
+
+<p><a href="/docs-v5/zh/#order-book-trading-trade-ws-cancel-order"><code>&quot;op&quot;: &quot;cancel-order&quot;</code></a></p>
+
+<p>同样，用户应会收到服务器相应 REST / WebSocket 的成功返回。当用户从 WebSocket 订单频道收到订单状态为 <code>canceled</code> 的推送更新时，才代表订单撤单成功。</p>
+
+<p>注：订单完全成交或撤单已成功时不能撤单。</p>
+
+<p>成功响应仅表示交易所已收到该请求，用户应参考websocket订单频道以进行确认。</p>
+<h2 id='order-management-batch-operations'>批量操作 </h2>
+<p>下单、改单、撤单均支持批量操作，每次最多 20 张订单。批量操作的订单可包括不同的产品类型。</p>
+
+<p>REST:</p>
+
+<table><thead>
+<tr>
+<th style="text-align: left"></th>
+<th style="text-align: left"></th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: left">下单</td>
+<td style="text-align: left"><a href="/docs-v5/zh/#order-book-trading-trade-post-place-multiple-orders"><code>POST /api/v5/trade/batch-orders</code></a></td>
+</tr>
+<tr>
+<td style="text-align: left">改单</td>
+<td style="text-align: left"><a href="/docs-v5/zh/#order-book-trading-trade-post-amend-multiple-orders"><code>POST /api/v5/trade/amend-batch-orders</code></a></td>
+</tr>
+<tr>
+<td style="text-align: left">撤单</td>
+<td style="text-align: left"><a href="/docs-v5/zh/#order-book-trading-trade-post-cancel-multiple-orders"><code>POST /api/v5/trade/cancel-batch-orders</code></a></td>
+</tr>
+</tbody></table>
+
+<p>WebSocket 业务操作请求参数：</p>
+
+<table><thead>
+<tr>
+<th style="text-align: left"></th>
+<th style="text-align: left"></th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: left">下单</td>
+<td style="text-align: left"><a href="/docs-v5/zh/#order-book-trading-trade-ws-place-multiple-orders"><code>&quot;op&quot;: &quot;batch-orders&quot;</code></a></td>
+</tr>
+<tr>
+<td style="text-align: left">改单</td>
+<td style="text-align: left"><a href="/docs-v5/zh/#order-book-trading-trade-ws-amend-multiple-orders"><code>&quot;op&quot;: &quot;batch-amend-orders&quot;</code></a></td>
+</tr>
+<tr>
+<td style="text-align: left">撤单</td>
+<td style="text-align: left"><a href="/docs-v5/zh/#order-book-trading-trade-ws-cancel-multiple-orders"><code>&quot;op&quot;: &quot;batch-cancel-orders&quot;</code></a></td>
+</tr>
+</tbody></table>
+
+<p>批量操作容许部分订单操作成功。在收到返回后，用户应检查返回结果内每个订单的<code>sCode</code>和<code>sMsg</code>字段来判段订单的执行结果。</p>
+<h2 id='order-management-order-timestamp'>订单时间戳 </h2>
+<p>订单数据中有多个时间戳，供用户跟踪订单状态和延迟。</p>
+
+<p><code>cTime</code> 是订单管理系统在风险检查后的订单创建时间。 <br>
+<code>uTime</code> 是订单管理系统最后一次更新订单的时间。在订单修改、成交和取消后进行更新。 <br>
+<code>fillTime</code> 是订单成交的时间。<code>fillTime</code> 与公共交易数据的时间相同。<br>
+<code>inTime</code> 是 WebSocket / REST 网关接收请求时的时间戳。REST接口返回的时间是请求验证后的时间。<br>
+<code>outTime</code> 是 WebSocket / REST 网关发送响应时的时间戳。</p>
+<h2 id='order-management-pagination'>分页 </h2>
+<p>欧易提供分页功能，以帮助用户从海量数据中轻松获得他们想要的数据。相关的请求参数如下：</p>
+
+<table><thead>
+<tr>
+<th>参数名</th>
+<th>类型</th>
+<th>是否必须</th>
+<th>描述</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>before</td>
+<td>String</td>
+<td>否</td>
+<td>请求此ID之后（更新的数据）的分页内容，传的值为对应接口的<code>ordId</code>, <code>billId</code>, <code>tradeId</code>, <code>ts</code> etc.</td>
+</tr>
+<tr>
+<td>after</td>
+<td>String</td>
+<td>否</td>
+<td>请求此ID之前（更旧的数据）的分页内容，传的值为对应接口的<code>ordId</code>, <code>billId</code>, <code>tradeId</code>, <code>ts</code> etc.</td>
+</tr>
+<tr>
+<td>limit</td>
+<td>String</td>
+<td>否</td>
+<td>返回结果的数量，最大为100，默认100条</td>
+</tr>
+</tbody></table>
+
+<p>请参阅以下功能提示及示例，以便更好地理解该功能。假设原始数据为 [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]。</p>
+
+<table><thead>
+<tr>
+<th>提示</th>
+<th>示例</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>无论用户如何输入请求参数，总是返回最新数据</td>
+<td>我们总是在最开始返回新数据，例如 [10, 9, 8, 7, ...]</td>
+</tr>
+<tr>
+<td>分页时，不包含before以及after</td>
+<td>若 before=6，after=10，返回的数据将会是 [9, 8, 7]</td>
+</tr>
+<tr>
+<td>若before及after之间的数据量超过limit，返回靠近after的数据记录</td>
+<td>若 before=2，after=9，limit=3，返回的数据将会是 [8, 7, 6]</td>
+</tr>
+<tr>
+<td>若仅传入before，不传入after，靠近before的数据将被返回</td>
+<td>若 before=6，limit=3，返回的数据将会是 [9, 8, 7] <br><br>该功能不适用于仓位历史接口，相同参数，仓位历史接口将返回 [10, 9, 8]，不靠近before返回</td>
+</tr>
+</tbody></table>
+
+<p><br>
+为了获取特定时间范围内的数据，我们还提供了时间戳过滤功能，应用于before/after已被用于ID分页的场景。请求参数如下：</p>
+
+<table><thead>
+<tr>
+<th>参数名</th>
+<th>类型</th>
+<th>是否必须</th>
+<th>描述</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>begin</td>
+<td>String</td>
+<td>No</td>
+<td>筛选的开始时间戳，Unix 时间戳为毫秒数格式，如 1597026383085</td>
+</tr>
+<tr>
+<td>end</td>
+<td>String</td>
+<td>No</td>
+<td>筛选的结束时间戳，Unix 时间戳为毫秒数格式，如 1597027383085</td>
+</tr>
+<tr>
+<td>limit</td>
+<td>String</td>
+<td>No</td>
+<td>分页返回的结果集数量，最大为100，不填默认返回100条</td>
+</tr>
+</tbody></table>
+
+<p>begin/end的使用方法与before/after略有不同。</p>
+
+<table><thead>
+<tr>
+<th>提示</th>
+<th>示例</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>过滤时间戳时，包含begin以及end</td>
+<td>若 begin=6，end=10，返回的数据将会是 [10, 9, 8, 7, 6]</td>
+</tr>
+<tr>
+<td>若begin及end之间的数据量超过limit，返回靠近end的数据记录。<br>若仅传入begin，不传入end，靠近begin的数据将被返回</td>
+<td>若 begin=6，limit=3，返回的数据将会是 [8, 7, 6] <br><br>该功能不适用于成交明细接口，相同参数，成交明细接口将返回[10, 9, 8]，不靠近begin返回。</td>
+</tr>
+</tbody></table>
+
+<p><br>
+若begin/end以及before/after被同时传入，我们将先根据begin/end进行时间戳过滤，并根据before/after对结果进行分页。</p>
+
+<p><br>
+拥有分页功能的交易接口罗列如下。</p>
+
+<ul>
+<li><a href="/docs-v5/zh/#order-book-trading-trade-get-order-list">GET / 获取未成交订单列表</a></li>
+<li><a href="/docs-v5/zh/#order-book-trading-trade-get-order-history-last-7-days">GET / 获取历史订单记录（近七天）</a></li>
+<li><a href="/docs-v5/zh/#order-book-trading-trade-get-order-history-last-3-months">GET / 获取历史订单记录（近三个月）</a></li>
+<li><a href="/docs-v5/zh/#order-book-trading-trade-get-transaction-details-last-3-days">GET / 获取成交明细（近三天）</a></li>
+<li><a href="/docs-v5/zh/#order-book-trading-trade-get-transaction-details-last-3-months">GET / 获取成交明细（近三个月）</a></li>
+<li><a href="/docs-v5/zh/#trading-account-rest-api-get-bills-details-last-7-days">账单流水查询（近七天）</a></li>
+<li><a href="/docs-v5/zh/#trading-account-rest-api-get-bills-details-last-3-months">账单流水查询（近三月）</a></li>
+<li><a href="/docs-v5/zh/#trading-account-rest-api-get-positions-history">查看历史持仓信息</a></li>
+</ul>
+<h2 id='order-management-self-trade-prevention'>自成交保护 </h2>
+<p>交易系统会以母账户维度实施强制自成交保护，同一母账户下所有账户，包括母账户本身和所有子账户，都无法进行自成交。订单的默认STP模式为<code>Cancel Maker</code>，用户亦可以通过下单接口的stpMode参数指定订单的STP模式。</p>
+
+<p>OKX 将支持 3 种 STP 模式（<code>stpMode</code>），分别是 <code>cancel_maker</code>、<code>cancel_taker</code> 和 <code>cancel_both</code>。</p>
+
+<p>注：强制自成交保护功能仅适用于所有用户，所有订单类型，以及所有订单簿交易产品。</p>
+<h3 id='order-management-self-trade-prevention-stp-modes'>自成交保护模式 </h3>
+<p>OKX 为用户提供了三种模式，定义了如何阻止自成交，这些模式基于taker订单当中的配置。</p>
+
+<p><strong>取消maker单</strong></p>
+
+<p>这是默认的 STP 模式。为防止自成交，maker单将被取消，然后taker单将继续与深度中的下一个订单成交。</p>
+
+<p><strong>取消taker单</strong></p>
+
+<p>为防止自成交，taker单将被取消。若用户的maker单在深度中排序较后，taker单将被部分成交然后取消。若FOK订单导致了自成交，它将直接被整体取消。</p>
+
+<p><strong>取消两者</strong></p>
+
+<p>为防止自成交，taker单和maker单都将被取消。若用户的maker单在深度中排序较后，那么taker单将被部分成交，然后taker单的剩余部分以及maker单会被取消。FOK订单在此模式中不受支持。只有一个报价单及询价单会被取消。</p>
+<h1 id='trading-account-and-positions-information'>交易账户和持仓 </h1><h2 id='trading-account-and-positions-information-account'>账户 </h2><h3 id='trading-account-and-positions-information-account-websocket-subscription'>WebSocket 订阅 </h3>
+<p>我们建议使用 WebSocket 订阅 <a href="/docs-v5/zh/#trading-account-websocket-account-channel"><code>账户</code></a> 频道收取账户更新。账户频道设有可选参数<code>ccy</code>，让用户可以仅收取指定账户币种的信息。</p>
+
+<p>该端点返回用户以美元为单元的资产价值，以及其他由于标识价格变化而持续更新的参数。OKX在估值变化时定期向用户发送更新数据。</p>
+
+<p>连接到私有 WebScoket 和登入后的请求和返回示例：</p>
+
+<table>
+    <tbody>
+        <tr>
+            <td></td>
+            <td><strong>账户</strong></td>
+            <td><strong>账户（仅指定的币种）</strong></td>
+        </tr>
+        <tr>
+            <td>请求</td>
+            <td>{<br>&nbsp;&nbsp;"op": "subscribe",<br>&nbsp;&nbsp;"args":
+                [<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"channel":
+                "account"<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;]<br>}</td>
+            <td>{<br>&nbsp;&nbsp;"op": "subscribe",<br>&nbsp;&nbsp;"args":
+                [<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"channel":
+                "account",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"ccy":
+                "BTC"<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;]<br>}</td>
+        </tr>
+        <tr>
+            <td>成功返回</td>
+            <td>{<br>&nbsp;&nbsp;"event": "subscribe",<br>&nbsp;&nbsp;"arg": {<br>&nbsp;&nbsp;&nbsp;&nbsp;"channel":
+                "account"<br>&nbsp;&nbsp;}<br>}</td>
+            <td>{<br>&nbsp;&nbsp;"event": "subscribe",<br>&nbsp;&nbsp;"arg": {<br>&nbsp;&nbsp;&nbsp;&nbsp;"channel":
+                "account",<br>&nbsp;&nbsp;&nbsp;&nbsp;"ccy": "BTC"<br>&nbsp;&nbsp;}<br>}</td>
+        </tr>
+    </tbody>
+</table>
+<h3 id='trading-account-and-positions-information-account-initial-snapshot'>首次订阅全量数据 </h3>
+<p>与订单频道不同，<a href="/docs-v5/zh/#trading-account-websocket-account-channel"><code>账户</code></a>频道首次订阅会推送全量数据，推送币种层面资产不为 0 的账户信息。币种层面资产不为 0 指币种总权益（<code>eq</code>）、可用保证金（<code>availEq</code>）、可用余额（<code>availBal</code>）任一字段不为 0。</p>
+
+<p>假设账户的 BTC 和 USDT 币种层面资产不为 0，而账户模式为跨币种保证金模式或组合保证金模式，用户应收到账户频道以下的信息示例：</p>
+
+<table>
+    <tbody>
+        <tr>
+            <td><strong>账户</strong></td>
+            <td><strong>账户（仅指定的币种）</strong></td>
+        </tr>
+        <tr>
+            <td>{<br>&nbsp;&nbsp;"arg": {<br>&nbsp;&nbsp;&nbsp;&nbsp;"channel":
+                "account"<br>&nbsp;&nbsp;},<br>&nbsp;&nbsp;"data":
+                [<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"adjEq":
+                "30979.1086748182657014",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"details":
+                [<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"availBal":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"availEq":
+                "18962.59868274799",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"ccy":
+                "USDT",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"crossLiab":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"disEq":
+                "18978.5272656414983116",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"eq":
+                "18962.59868274799",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"frozenBal":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"interest":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"isoEq":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"isoLiab":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"liab":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"mgnRatio":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"ordFrozen":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"upl":
+                "0"<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"availBal":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"availEq":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"ccy":
+                "BTC",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"crossLiab":
+                "0.509575622217854",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"disEq":
+                "-25408.4180739947324516",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"eq":
+                "-0.5096053466363398",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"frozenBal":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"interest":
+                "0.0000297244184858",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"isoEq":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"isoLiab":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"liab":
+                "0.509575622217854",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"mgnRatio":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"ordFrozen":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"upl":
+                "0"<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;],<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"imr":
+                "8469.4726913315758219",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"isoEq":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"mgnRatio":
+                "39.9556239578938079",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"mmr":
+                "762.252542219842",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"totalEq":
+                "44480.5383005753085878",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"uTime":
+                "1615190165641"<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;]<br>}<br></td>
+            <td>{<br>&nbsp;&nbsp;"arg": {<br>&nbsp;&nbsp;&nbsp;&nbsp;"channel":
+                "account",<br>&nbsp;&nbsp;&nbsp;&nbsp;"ccy": "BTC"<br>&nbsp;&nbsp;},<br>&nbsp;&nbsp;"data":
+                [<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"adjEq":
+                "30979.1086748182657014",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"details":
+                [<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"availBal":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"availEq":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"ccy":
+                "BTC",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"crossLiab":
+                "0.509575622217854",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"disEq":
+                "-25408.4180739947324516",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"eq":
+                "-0.5096053466363398",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"frozenBal":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"interest":
+                "0.0000297244184858",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"isoEq":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"isoLiab":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"liab":
+                "0.509575622217854",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"mgnRatio":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"ordFrozen":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"upl":
+                "0"<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;],<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"imr":
+                "8469.4726913315758219",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"isoEq":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"mgnRatio":
+                "39.9556239578938079",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"mmr":
+                "762.252542219842",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"totalEq":
+                "44480.5383005753085878",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"uTime":
+                "1615190165641"<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;]<br>}<br></td>
+        </tr>
+    </tbody>
+</table>
+<h3 id='trading-account-and-positions-information-account-subsequent-updates'>后续推送 </h3>
+<p>之后，用户会根据以下情况收到账户数据推送：</p>
+
+<table><thead>
+<tr>
+<th style="text-align: left"></th>
+<th style="text-align: left"></th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: left">事件触发推送</td>
+<td style="text-align: left">下单、撤单等事件会触发推送。多项事件（如同时间有多个订单成交）有可能会聚合成单个账户信息推送。仅推送受事件变更的币种，包括币种资产变为 0。</td>
+</tr>
+<tr>
+<td style="text-align: left">定时推送</td>
+<td style="text-align: left">定时推送，目前为每 5 秒推送一次。与首次订阅一样，推送全量数据，即推送所有币种（或<code>ccy</code>参数指定的币种）层面资产不为 0 的账户信息。</td>
+</tr>
+</tbody></table>
+<h3 id='trading-account-and-positions-information-account-rest-api'>REST API </h3>
+<p>用户亦可以通过 REST API 查看币种层面资产不为 0 的账户余额：</p>
+
+<p><a href="/docs-v5/zh/#trading-account-rest-api-get-balance"><code>GET /api/v5/account/balance</code></a></p>
+
+<p>REST API 亦提供可选参数<code>ccy</code>，支持单个币种（如<code>BTC</code>）或多个以逗号分隔的币种（如 BTC,USDT,ETH）查询，最多 20 个。</p>
+
+<p>示例：</p>
+
+<p><a href="/docs-v5/zh/#trading-account-rest-api-get-balance"><code>GET /api/v5/account/balance?ccy=BTC,USDT,ETH</code></a></p>
+
+<p>当用户于<code>ccy</code>参数指定币种时，无论该币种层面资产是否为 0，REST API 均会返回该币种的数据，与 WebSocket 账户频道不同。这只适用于曾经持有的币种。</p>
+<h2 id='trading-account-and-positions-information-maximum-available-tradable-amount'>最大可用数量 </h2>
+<p>跨币种保证金模式下，启用自动借币能让用户以多于币种余额的数量买入/卖出产品。</p>
+
+<p>在这种情况下，用户便会想知道该产品最大的买入/卖出数量为多少。用户可以轮询以下的 REST API 得知最大可用数量（包括可用余额和交易所的最大可借）：</p>
+
+<p><a href="/docs-v5/zh/#trading-account-rest-api-get-maximum-available-balance-equity"><code>GET /api/v5/account/max-avail-size</code></a></p>
+
+<p>跨币种保证金模式下，BTC-USDT 全仓的请求和返回示例：</p>
+
+<table>
+    <tbody>
+        <tr>
+            <td>请求</td>
+            <td>GET /api/v5/account/max-avail-size?instId=BTC-USDT&amp;tdMode=cross</td>
+        </tr>
+        <tr>
+            <td>成功返回</td>
+            <td>{<br>&nbsp;&nbsp;"code": "0",<br>&nbsp;&nbsp;"data":
+                [<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"availBuy":
+                "213800.4239369798722052",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"availSell":
+                "1.3539405224369181",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instId":
+                "BTC-USDT"<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;],<br>&nbsp;&nbsp;"msg": ""<br>}</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>币币的<code>availBuy</code>为计价货币，<code>availSell</code>为交易货币。</p>
+
+<p>以上的返回结果表示 BTC-USDT 最大买入可用数量为 213,800.42 USDT，最大卖出可用数量为 1.35394052 BTC。这应与网页上交易时显示的数量一样。</p>
+<h2 id='trading-account-and-positions-information-maximum-withdrawal-amount'>最大可转余额 </h2>
+<p>为了获得交易账户或是某个子账户的最大可转余额，用户可以通过 <a href="/docs-v5/zh/#trading-account-rest-api-get-maximum-withdrawals"><code>GET /api/v5/account/max-withdrawal</code></a> 获取余额。</p>
+
+<p>此端点返回的数据考虑了未偿还的贷款和使用中的保证金。</p>
+<h2 id='trading-account-and-positions-information-balance-and-position'>余额和持仓 </h2>
+<p>当特定事件（如订单成交、资金转移）被触发时，数据将被推送。</p>
+
+<p><a href="/docs-v5/zh/#trading-account-websocket-balance-and-position-channel"><code>账户余额和持仓</code></a>频道适用于获取账户余额和仓位资产的变化。</p>
+
+<p>如果用户拥有了太多货币，且数据太大以至于无法在单个推送中发送，它将被拆分为多个消息。</p>
+
+<p>在账户余额和持仓发生变化时，与账户频道和持仓频道相比，此频道的字段较少，以便以最低延迟将更改推送给客户。</p>
+<h2 id='trading-account-and-positions-information-positions'>持仓 </h2>
+<p>用户应该使用 WebSocket 获取持仓信息更新。</p>
+<h3 id='trading-account-and-positions-information-positions-websocket-subscription'>WebSocket 订阅 </h3>
+<p>与订单频道类似，<a href="/docs-v5/zh/#trading-account-websocket-positions-channel"><code>持仓</code></a>频道提供多种维度的订阅。</p>
+
+<p>该端点返回标识价格以及其他持续变化的参数。OKX会定期向用户推送数据更新。</p>
+
+<p>要订阅以上 BTC-USDT-SWAP 持仓的数据，用户可在连接到和登入私有 WebSocket 后，传送下表任一请求：</p>
+
+<table>
+    <tbody>
+        <tr>
+            <td></td>
+            <td><strong>产品类型</strong></td>
+            <td><strong>产品类型 + 交易品种</strong><strong><br></strong><strong>(仅限衍生产品)</strong>
+            </td>
+            <td><strong>产品类型 + 产品 ID</strong></td>
+        </tr>
+        <tr>
+            <td>请求</td>
+            <td>{<br>&nbsp;&nbsp;"op": "subscribe",<br>&nbsp;&nbsp;"args":
+                [<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"channel":
+                "positions",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instType":
+                "SWAP"<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;]<br>}</td>
+            <td>{<br>&nbsp;&nbsp;"op": "subscribe",<br>&nbsp;&nbsp;"args":
+                [<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"channel":
+                "positions",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instType":
+                "SWAP",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instFamily":
+                "BTC-USDT"<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;]<br>}</td>
+            <td>{<br>&nbsp;&nbsp;"op": "subscribe",<br>&nbsp;&nbsp;"args":
+                [<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"channel":
+                "positions",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instType":
+                "SWAP",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instId":
+                "BTC-USDT-SWAP"<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;]<br>}</td>
+        </tr>
+        <tr>
+            <td>成功&nbsp;返回</td>
+            <td>{<br>&nbsp;&nbsp;"event": "subscribe",<br>&nbsp;&nbsp;"arg": {<br>&nbsp;&nbsp;&nbsp;&nbsp;"channel":
+                "positions",<br>&nbsp;&nbsp;&nbsp;&nbsp;"instType": "SWAP"<br>&nbsp;&nbsp;}<br>}</td>
+            <td>{<br>&nbsp;&nbsp;"event": "subscribe",<br>&nbsp;&nbsp;"args":
+                [<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"channel":
+                "positions",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instType":
+                "SWAP",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instFamily":
+                "BTC-USDT"<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;]<br>}</td>
+            <td>{<br>&nbsp;&nbsp;"event": "subscribe",<br>&nbsp;&nbsp;"args":
+                [<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"channel":
+                "positions",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instType":
+                "SWAP",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instId":
+                "BTC-USDT-SWAP"<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;]<br>}</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>用户亦可以把<code>instType</code>参数填上<code>ANY</code>，一次性订阅所有产品类型的持仓更新。</p>
+<h3 id='trading-account-and-positions-information-positions-initial-snapshot'>首次订阅全量数据 </h3>
+<p>持仓频道首次订阅会推送全量数据，推送持仓数量不为 0 的持仓信息。持仓数量不为 0 指 pos 字段大于或小于 0。</p>
+
+<p>我们继续沿用先前章节的 BTC-USDT-SWAP 全仓订单（买卖模式）例子。在订阅持仓频道（产品类型 + 交易品种维度）后，用户应收到以下的推送信息示例：</p>
+
+<table>
+    <tbody>
+        <tr>
+            <td>{<br>&nbsp;&nbsp;"arg": {<br>&nbsp;&nbsp;&nbsp;&nbsp;"channel":
+                "positions",<br>&nbsp;&nbsp;&nbsp;&nbsp;"instType": "SWAP",<br>&nbsp;&nbsp;&nbsp;&nbsp;"instFamily":
+                "BTC-USDT"<br>&nbsp;&nbsp;},<br>&nbsp;&nbsp;"data":
+                [<br>&nbsp;&nbsp;&nbsp;&nbsp;{<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"adl":
+                "2",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"availPos":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"avgPx":
+                "50912.4",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"cTime":
+                "1615170596148",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"ccy":
+                "USDT",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"imr":
+                "165.15734103333082",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instId":
+                "BTC-USDT-SWAP",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"instType":
+                "SWAP",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"interest":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"last":
+                "51000",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"lever":
+                "3",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"liab":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"liabCcy":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"liqPx": "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"margin":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"mgnMode":
+                "cross",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"mgnRatio":
+                "0",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"mmr":
+                "1.98188809239997",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"optVal":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"pTime":
+                "1615196199624",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"pos":
+                "1",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"posCcy":
+                "",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"posId":
+                "287999792370819074",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"posSide":
+                "net",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"tradeId":
+                "60477021",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"uTime":
+                "1615170598022",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"upl":
+                "0.4520230999924388",<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"uplRatio":
+                "0.0027394232555804"<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>&nbsp;&nbsp;]<br>}</td>
+        </tr>
+    </tbody>
+</table>
+<h3 id='trading-account-and-positions-information-positions-subsequent-updates'>后续推送 </h3>
+<p>之后，与账户频道相似，用户会根据以下情况收到持仓数据推送：</p>
+
+<table><thead>
+<tr>
+<th style="text-align: left"></th>
+<th style="text-align: left"></th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: left">事件触发推送</td>
+<td style="text-align: left">开仓、平仓等事件会触发推送。多项事件（如同时间有多个订单成交）有可能会聚合成单个持仓信息推送。<br>仅推送受事件变更的持仓，包括平仓（即持仓数量变为 0）。</td>
+</tr>
+<tr>
+<td style="text-align: left">定时推送</td>
+<td style="text-align: left">定时推送，目前为每 5 秒推送一次。与首次订阅一样，推送全量数据，即推送订阅维度上指定的所有不为 0 的持仓。</td>
+</tr>
+</tbody></table>
+<h3 id='trading-account-and-positions-information-positions-position-id'>持仓 ID </h3>
+<p>您可能会发现每项持仓数据均设有持仓 ID 字段（<code>posId</code>）。这字段可以用作填写 REST API 可选查询参数，会在下一章节讲解。</p>
+
+<p>持仓 ID 由<code>mgnMode</code>+<code>posSide</code>+<code>instId</code>+<code>ccy</code>这几个字段所产生，可让您唯一地识别同一个账户内的持仓。持仓 ID 不会因平仓及再开仓而变动。如果很久没有仓位的话，系统可能产生一个新的持仓 ID。</p>
+<h3 id='trading-account-and-positions-information-positions-rest-api'>REST API </h3>
+<p>用户亦可以通过 REST API 查看持仓数量不为 0 的持仓信息：</p>
+
+<p><a href="/docs-v5/zh/#trading-account-rest-api-get-positions"><code>GET /api/v5/account/positions</code></a></p>
+
+<p>REST API 提供以下维度查询：</p>
+
+<table><thead>
+<tr>
+<th style="text-align: left"><strong>维度</strong></th>
+<th style="text-align: left"><strong>示例</strong></th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: left">产品类型</td>
+<td style="text-align: left">GET /api/v5/account/positions?instType=SWAP</td>
+</tr>
+<tr>
+<td style="text-align: left">产品 ID</td>
+<td style="text-align: left">GET /api/v5/account/positions?instId=BTC-USDT-SWAP</td>
+</tr>
+<tr>
+<td style="text-align: left">持仓 ID（单个）</td>
+<td style="text-align: left">GET /api/v5/account/positions?posId=287999792370819074</td>
+</tr>
+<tr>
+<td style="text-align: left">持仓 ID（多个，最多 20 个）</td>
+<td style="text-align: left">GET /api/v5/account/positions?posId=287999792370819074,289098391880081414</td>
+</tr>
+</tbody></table>
+
+<p>值得一提的是，当用户于<code>posId</code>参数指定持仓时，无论持仓是否已平仓，REST API 均会返回该持仓的数据，与 WebSocket 持仓频道不同。这只适用于曾经开仓的持仓。</p>
+<h2 id='trading-account-and-positions-information-reconciliation-between-fill-and-positions'>订单成交推送与持仓的对账 </h2>
+<p>运用持仓频道新增的最新成交 ID （<code>tradeId</code>字段），用户可以进行订单频道成交推送与持仓的对账。这样做法其中一个案例就是用户想从订单成交推算出现有的持仓数量。</p>
+
+<p>成交 ID 的唯一性基于每一产品 ID (<code>instId</code>)。</p>
+
+<p>新的订单成交均会指派较新的成交 ID。利用这一特性，用户可用成交 ID 匹配相应的持仓/订单成交，并以成交 ID 的数字比较哪项数据较新。</p>
+
+<p>不过，用户需要注意下列事项：</p>
+
+<ul>
+<li>  多个持仓变化有可能会聚合成单个持仓信息推送，即持仓信息只有最新的成交 ID，并非每一个订单成交更新均能与持仓信息匹配</li>
+<li>  强平/强减或 ADL 不会推送订单更新（因订单为系统所拥有）</li>
+<li>  因强平/强减或 ADL 而触发的持仓更新不会更新 <code>tradeId</code></li>
+</ul>
+
+<p>要准确地进行订单成交推送与持仓的对账，用户必需考虑以上的注意事项，除比较<code>tradeId</code>外还需比较持仓数量（或比较持仓更新时间<code>uTime</code>字段）。</p>
+
+<p>我们来看看以下的推送序列示例。假设下列都是同样产品及同样保证金模式的数据，持仓模式为买卖模式。</p>
+
+<table><thead>
+<tr>
+<th style="text-align: left"><strong>序列</strong></th>
+<th style="text-align: left"><strong>频道</strong></th>
+<th style="text-align: left"><strong>数据</strong></th>
+<th style="text-align: left"><strong>对账后的持仓</strong></th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: left">1</td>
+<td style="text-align: left">order (订单)</td>
+<td style="text-align: left">fillSz=20, side=buy, tradeId=150</td>
+<td style="text-align: left">20</td>
+</tr>
+<tr>
+<td style="text-align: left">2</td>
+<td style="text-align: left">positions (持仓)</td>
+<td style="text-align: left">pos=20, tradeId=150, uTime=1614859751636</td>
+<td style="text-align: left">20</td>
+</tr>
+<tr>
+<td style="text-align: left">3</td>
+<td style="text-align: left">positions (持仓)</td>
+<td style="text-align: left">pos=18, tradeId=151, uTime=1614859752637</td>
+<td style="text-align: left">18</td>
+</tr>
+<tr>
+<td style="text-align: left">4</td>
+<td style="text-align: left">order (订单)</td>
+<td style="text-align: left">fillSz=2, side=sell, tradeId=151</td>
+<td style="text-align: left">18</td>
+</tr>
+<tr>
+<td style="text-align: left">5</td>
+<td style="text-align: left">order (订单)</td>
+<td style="text-align: left">fillSz=3, side=sell, tradeId=156</td>
+<td style="text-align: left">15</td>
+</tr>
+<tr>
+<td style="text-align: left">6</td>
+<td style="text-align: left">order (订单)</td>
+<td style="text-align: left">fillSz=1, side=sell, tradeId=158</td>
+<td style="text-align: left">14</td>
+</tr>
+<tr>
+<td style="text-align: left">7</td>
+<td style="text-align: left">positions (持仓)</td>
+<td style="text-align: left">pos=10, tradeId=163, uTime=1614859755037</td>
+<td style="text-align: left">10</td>
+</tr>
+<tr>
+<td style="text-align: left">8</td>
+<td style="text-align: left">order (订单)</td>
+<td style="text-align: left">fillSz=1, side=sell, tradeId=159</td>
+<td style="text-align: left">10</td>
+</tr>
+<tr>
+<td style="text-align: left">9</td>
+<td style="text-align: left">order (订单)</td>
+<td style="text-align: left">fillSz=3, side=sell, tradeId=163</td>
+<td style="text-align: left">10</td>
+</tr>
+<tr>
+<td style="text-align: left">10</td>
+<td style="text-align: left">positions (持仓)</td>
+<td style="text-align: left">pos=10, tradeId=163, uTime=1614859755037</td>
+<td style="text-align: left">10</td>
+</tr>
+<tr>
+<td style="text-align: left">11</td>
+<td style="text-align: left">positions (持仓)</td>
+<td style="text-align: left">pos=6, tradeId=163, uTime=1614866547430</td>
+<td style="text-align: left">6</td>
+</tr>
+</tbody></table>
+
+<p>从中观察，我们得知：</p>
+
+<ul>
+<li>  收到 tradeId=163 的单个持仓推送 #7，即代表与持仓对账时，可忽略<code>tradeId</code>&lt;=163 的订单推送。换言之，我们可忽略订单推送 #8 和 #9</li>
+<li>  持仓推送 #10 与 #7 的<code>tradeId</code>和<code>pos</code>（和<code>uTime</code>）一样，这表示我们可以认为 #10 为持仓每 10 秒的定时推送</li>
+<li>  持仓推送 #11 具同样的<code>tradeId</code>=163 但持仓数量有变化（<code>uTime</code>也较新），我们可推断这推送是由强减或 ADL 触发</li>
+</ul>
+<h1 id='identifiers'>标识符 </h1>
+<table><thead>
+<tr>
+<th>标识符</th>
+<th>描述</th>
+</tr>
+</thead><tbody>
+<tr>
+<td>ordId</td>
+<td>订单ID，全局唯一</td>
+</tr>
+<tr>
+<td>clOrdId</td>
+<td>客户自定义订单ID，所有交易产品挂单维度唯一</td>
+</tr>
+<tr>
+<td>billId</td>
+<td>账单ID，全局唯一</td>
+</tr>
+<tr>
+<td>tradeId</td>
+<td>最新成交ID，交易产品维度唯一 <br>在强平、自动减仓场景下，tradeId字段的值为负数，以便和其他撮合成交场景区分</td>
+</tr>
+<tr>
+<td>posId</td>
+<td>持仓ID，由<code>mgnMode</code>+<code>posSide</code>+<code>instId</code>+<code>ccy</code>这几个字段所产生，可唯一地识别同一个账户内的持仓。 <br>持仓 ID 不会因平仓及再开仓而变动。如果很久没有仓位的话，系统可能产生一个新的持仓 ID；切换账户模式、仓位模式时，系统也会产生一个新的持仓ID。</td>
+</tr>
+</tbody></table>
+<h1 id='system-status'>系统状态 </h1>
+<p>用户可以通过 <a href="/docs-v5/zh/#status-get-status"><code>GET /api/v5/system/status</code></a> 获取交易所状态。</p>
+
+<p>后续的状态更新将从websocket <a href="/docs-v5/zh/#status-ws-status-channel"><code>status</code></a> 频道发布。</p>
+
+<p>由计划系统维护引起的短暂不可用（&lt;5秒）和WebSocket闪断连接（用户可以立即重连）将不会公布。此类维护只会在市场波动性低的时期进行。</p>
+
+        </div>
+        <div class="dark-box">
+        </div>
+    </div>
+  </body>
+</html>

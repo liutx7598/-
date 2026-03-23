@@ -1,0 +1,47 @@
+{
+  "name": "okx-pattern-screener",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k -n server,client -c cyan,green \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:client": "vite",
+    "dev:server": "tsx watch server/index.ts",
+    "build": "tsc -b && vite build",
+    "test": "node --import tsx --test server/okx.test.ts server/screener.test.ts server/llm-history.test.ts",
+    "start": "tsx server/index.ts",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "bottleneck": "^2.19.5",
+    "concurrently": "^9.2.1",
+    "cors": "^2.8.6",
+    "echarts": "^6.0.0",
+    "echarts-for-react": "^3.0.6",
+    "eslint-scope": "^8.4.0",
+    "express": "^5.2.1",
+    "lucide-react": "^0.577.0",
+    "picomatch": "^4.0.3",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "scheduler": "^0.27.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.12.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^4.7.0",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.4.0",
+    "tsx": "^4.21.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.57.0",
+    "vite": "^5.4.19"
+  }
+}
