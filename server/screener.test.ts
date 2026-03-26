@@ -45,16 +45,34 @@ const baseInstrument: GateInstrument = {
   state: 'live',
 }
 
-function makeCandles(closes: number[], lastConfirmed = true): RawCandle[] {
-  return closes.map((close, index) => ({
-    timestamp: new Date(2026, 2, 20, 9, index, 0, 0).getTime(),
-    open: close,
-    high: close + 0.1,
-    low: close - 0.1,
-    close,
-    volume: 100 + index,
-    confirmed: index === closes.length - 1 ? lastConfirmed : true,
-  }))
+type CandleInput =
+  | number
+  | {
+      open: number
+      close: number
+      high?: number
+      low?: number
+    }
+
+function makeCandles(values: CandleInput[], lastConfirmed = true): RawCandle[] {
+  return values.map((value, index) => {
+    const close = typeof value === 'number' ? value : value.close
+    const open = typeof value === 'number' ? close : value.open
+    const high =
+      typeof value === 'number' ? close + 0.1 : (value.high ?? Math.max(open, close) + 0.1)
+    const low =
+      typeof value === 'number' ? close - 0.1 : (value.low ?? Math.min(open, close) - 0.1)
+
+    return {
+      timestamp: new Date(2026, 2, 20, 9, index, 0, 0).getTime(),
+      open,
+      high,
+      low,
+      close,
+      volume: 100 + index,
+      confirmed: index === values.length - 1 ? lastConfirmed : true,
+    }
+  })
 }
 
 function makeResult(
@@ -143,7 +161,7 @@ test('buildResult returns a matched signal when A B C all pass', () => {
   const result = buildResult(
     baseInstrument,
     '15m',
-    makeCandles([10, 10, 10, 10, 10.1]),
+    makeCandles([10, 10, 10, 10, { open: 10.02, close: 10.1 }]),
     baseConfig,
   )
 
@@ -159,7 +177,7 @@ test('buildResult returns non-match when convergence threshold is too strict', (
   const result = buildResult(
     baseInstrument,
     '15m',
-    makeCandles([10, 10, 10, 10, 10.1]),
+    makeCandles([10, 10, 10, 10, { open: 10.02, close: 10.1 }]),
     { ...baseConfig, convergenceThresholdPct: 0.01 },
   )
 
@@ -172,7 +190,7 @@ test('buildResult rejects a flat cross when cross slope filter is enabled', () =
   const result = buildResult(
     baseInstrument,
     '15m',
-    makeCandles([10, 10, 10, 10, 10.001]),
+    makeCandles([10, 10, 10, 10, { open: 10, close: 10.001 }]),
     {
       ...baseConfig,
       crossSlopeEnabled: true,
@@ -188,7 +206,7 @@ test('buildResult rejects a flat cross when cross slope filter is enabled', () =
 })
 
 test('buildResult respects strict_positive MA strategy differently from stair_up', () => {
-  const candles = makeCandles([10, 10.2, 9.9, 9.8, 10.2])
+  const candles = makeCandles([10, 10.2, 9.9, 9.8, { open: 9.7, close: 10.2 }])
   const stairUpResult = buildResult(
     baseInstrument,
     '15m',
@@ -208,6 +226,20 @@ test('buildResult respects strict_positive MA strategy differently from stair_up
   assert.equal(strictResult.trendFlags.fastMaRising, true)
   assert.equal(stairUpResult.isMatch, false)
   assert.equal(strictResult.isMatch, true)
+})
+
+test('buildResult rejects candles that are already entirely above MA5 without body crossing', () => {
+  const result = buildResult(
+    baseInstrument,
+    '15m',
+    makeCandles([10, 10, 10, 10, { open: 10.06, close: 10.1 }]),
+    baseConfig,
+  )
+
+  assert.ok(result)
+  assert.equal(result.trendFlags.rawPriceCrossedFastMa, false)
+  assert.equal(result.trendFlags.priceCrossedFastMa, false)
+  assert.equal(result.isMatch, false)
 })
 
 test('buildResult can require both 5/20 and 10/30 convergence together', () => {

@@ -75,6 +75,10 @@ function calculatePercentSlope(currentValue: number, previousValue: number) {
   return ((currentValue - previousValue) / previousValue) * 100
 }
 
+function hasBullishBodyCrossThroughMa(candle: RawCandle, movingAverage: number) {
+  return candle.close > candle.open && candle.open <= movingAverage && candle.close > movingAverage
+}
+
 export function resolveMatch(
   matchMode: MatchMode,
   flags: ScreenerResult['trendFlags'],
@@ -167,7 +171,8 @@ export function buildResult(
         ? primaryConverging && secondaryConverging
         : primaryConverging || secondaryConverging
   const rawPriceCrossedFastMa =
-    previousCandle.close <= previousFastMa && latestCandle.close > latestFastMa
+    latestCandle.close > previousCandle.close &&
+    hasBullishBodyCrossThroughMa(latestCandle, latestFastMa)
   const crossSlopePct = calculatePercentSlope(latestFastMa, previousFastMa)
   const crossSlopeQualified =
     !config.crossSlopeEnabled || crossSlopePct >= config.crossSlopeThresholdPct

@@ -824,7 +824,7 @@ function App() {
           <h1>Gate 永续合约多周期形态筛选助手</h1>
           <p className="hero-text">
             当前版本使用 <code>规则引擎</code> 做首轮多周期筛选，规则默认为
-            <code>MA5 / MA20 收拢 + MA5 抬头 + K线上穿 MA5</code>。
+            <code>MA5 / MA20 收拢 + MA5 抬头 + K线实体上穿 MA5</code>。
             {snapshot.llmAnalysisEnabled
               ? ' Qwen 已接入，打开图表弹窗时会对命中结果做二次摘要分析并缓存。'
               : ' 外部 LLM 还未启用，所以你现在看到的命中结果都来自规则判断。'}
@@ -1237,8 +1237,8 @@ function App() {
 
           <label className="toggle-card" htmlFor="cross-slope-enabled">
             <div>
-              <span>上穿斜率过滤</span>
-              <small>过滤掉 MA5 斜率过平的“平穿”，只保留更有抬升感的上穿</small>
+              <span>实体上穿斜率过滤</span>
+              <small>过滤掉 MA5 斜率过平、只是贴着均线站上的情况，只保留更像实体上穿的信号</small>
             </div>
             <input
               id="cross-slope-enabled"
@@ -1255,7 +1255,7 @@ function App() {
           </label>
 
           <label className="field" htmlFor="cross-slope-threshold">
-            <span>上穿最小斜率 %</span>
+            <span>实体上穿最小斜率 %</span>
             <input
               id="cross-slope-threshold"
               name="cross_slope_threshold"
@@ -1438,7 +1438,7 @@ function App() {
 
           <p className="note">
             说明：当前版本已经保留 <code>3H = 1H 聚合</code>、<code>matchMode</code> 和
-            <code>MA5 抬头策略</code>、<code>上穿斜率过滤</code>、<code>附加 10/30 收拢</code> 的可配置能力；
+            <code>MA5 抬头策略</code>、<code>实体上穿斜率过滤</code>、<code>附加 10/30 收拢</code> 的可配置能力；
             {snapshot.llmAnalysisEnabled
               ? ' Qwen 已启用，命中后可在图表弹窗里查看二次分析摘要。'
               : ' 当前 Qwen 仍未启用，所以还不会生成“命中后二次分析摘要”。'}
@@ -1507,7 +1507,7 @@ function App() {
                   <th>MA20</th>
                   <th>距离%</th>
                   <th>MA5方向</th>
-                  <th>上穿MA5</th>
+                  <th>实体上穿MA5</th>
                   <th>命中时间</th>
                   <th>提醒状态</th>
                   <th>图表</th>
@@ -1543,7 +1543,7 @@ function App() {
                             />
                             <Flag
                               active={result.trendFlags.priceCrossedFastMa}
-                              label="上穿"
+                              label="实体上穿"
                             />
                           </div>
                         </div>
@@ -1596,7 +1596,7 @@ function App() {
                       <td>
                         <div className="metric-cell">
                           <strong>{result.trendFlags.priceCrossedFastMa ? '是' : '否'}</strong>
-                          <small>斜率 {formatPercent(result.crossSlopePct)}</small>
+                          <small>实体斜率 {formatPercent(result.crossSlopePct)}</small>
                         </div>
                       </td>
                       <td>{formatDateTime(result.crossedAt)}</td>
@@ -1682,7 +1682,7 @@ function App() {
                 MA5趋势：{modalItem?.maTrendDirection}
               </div>
               <div className="summary-chip">
-                上穿斜率：{modalItem ? formatPercent(modalItem.crossSlopePct) : '--'}
+                实体上穿斜率：{modalItem ? formatPercent(modalItem.crossSlopePct) : '--'}
               </div>
             </div>
             {snapshot.llmAnalysisEnabled ? (
