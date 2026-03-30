@@ -1238,7 +1238,7 @@ function App() {
           <label className="toggle-card" htmlFor="cross-slope-enabled">
             <div>
               <span>实体上穿斜率过滤</span>
-              <small>过滤掉 MA5 斜率过平、只是贴着均线站上的情况，只保留更像实体上穿的信号</small>
+              <small>要求 MA5 严格处于开盘价和收盘价之间，同时过滤掉斜率过平、只是贴着均线站上的情况</small>
             </div>
             <input
               id="cross-slope-enabled"

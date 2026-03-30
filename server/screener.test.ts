@@ -242,6 +242,21 @@ test('buildResult rejects candles that are already entirely above MA5 without bo
   assert.equal(result.isMatch, false)
 })
 
+test('buildResult rejects candles that only touch MA5 at the open without strictly crossing the body', () => {
+  const result = buildResult(
+    baseInstrument,
+    '15m',
+    makeCandles([10, 10, 10, 10, { open: 10.0005, close: 10.001 }]),
+    baseConfig,
+  )
+
+  assert.ok(result)
+  assert.ok(Math.abs(result.fastMa - 10.0005) < 1e-9)
+  assert.equal(result.trendFlags.rawPriceCrossedFastMa, false)
+  assert.equal(result.trendFlags.priceCrossedFastMa, false)
+  assert.equal(result.isMatch, false)
+})
+
 test('buildResult can require both 5/20 and 10/30 convergence together', () => {
   const result = buildResult(
     baseInstrument,

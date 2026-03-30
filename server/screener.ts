@@ -76,7 +76,7 @@ function calculatePercentSlope(currentValue: number, previousValue: number) {
 }
 
 function hasBullishBodyCrossThroughMa(candle: RawCandle, movingAverage: number) {
-  return candle.close > candle.open && candle.open <= movingAverage && candle.close > movingAverage
+  return candle.close > candle.open && candle.open < movingAverage && candle.close > movingAverage
 }
 
 export function resolveMatch(
