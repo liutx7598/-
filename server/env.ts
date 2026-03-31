@@ -58,7 +58,15 @@ function normalizeModelName(value: string | undefined, source: 'qwen' | 'fallbac
   const normalized = value?.trim()
 
   if (!normalized) {
-    return 'qwen3.5-plus'
+    return 'qwen-turbo'
+  }
+
+  if (/qwen[\s/-]*turbo/i.test(normalized)) {
+    return 'qwen-turbo'
+  }
+
+  if (/qwen[\s/-]*mini/i.test(normalized)) {
+    return 'qwen-mini'
   }
 
   if (/qwen[\s/-]*3\.5[\s/-]*plus/i.test(normalized)) {
@@ -70,7 +78,7 @@ function normalizeModelName(value: string | undefined, source: 'qwen' | 'fallbac
   }
 
   if (source === 'fallback' && normalized.includes('/')) {
-    return 'qwen3.5-plus'
+    return 'qwen-turbo'
   }
 
   return normalized

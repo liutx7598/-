@@ -1,6 +1,6 @@
 import Bottleneck from 'bottleneck'
 
-import { TIMEFRAME_MAP, type TimeframeKey } from '../shared/timeframes'
+import { TIMEFRAME_MAP, type ApiBar, type TimeframeKey } from '../shared/timeframes'
 import type {
   ChartCandle,
   MatchMode,
@@ -17,6 +17,7 @@ import {
   type GateInstrument,
   type RawCandle,
 } from './gate'
+import { evaluateConditions } from './condition-evaluator'
 import { detectPatterns } from './pattern-detector'
 import { buildAiRecommendation } from './recommendation-label'
 
@@ -79,6 +80,33 @@ function hasBullishBodyCrossThroughMa(candle: RawCandle, movingAverage: number) 
   return candle.close > candle.open && candle.open < movingAverage && candle.close > movingAverage
 }
 
+function calculateWindowChangePct(candles: RawCandle[]) {
+  const confirmed = candles.filter((candle) => candle.confirmed)
+
+  if (confirmed.length < 2) {
+    return null
+  }
+
+  const latest = confirmed[confirmed.length - 1]
+  const previous = confirmed[confirmed.length - 2]
+
+  if (previous.close === 0) {
+    return null
+  }
+
+  return ((latest.close - previous.close) / previous.close) * 100
+}
+
+function buildPriceChanges(rawMap: Partial<Record<ApiBar, RawCandle[]>>) {
+  return {
+    '1m': calculateWindowChangePct(rawMap['1m'] ?? []),
+    '5m': calculateWindowChangePct(rawMap['5m'] ?? []),
+    '1h': calculateWindowChangePct(rawMap['1h'] ?? []),
+    '4h': calculateWindowChangePct(rawMap['4h'] ?? []),
+    today: calculateWindowChangePct(rawMap['1d'] ?? []),
+  } satisfies ScreenerResult['priceChanges']
+}
+
 export function resolveMatch(
   matchMode: MatchMode,
   flags: ScreenerResult['trendFlags'],
@@ -103,6 +131,7 @@ export function buildResult(
   timeframe: TimeframeKey,
   candles: RawCandle[],
   config: ScreenerConfig,
+  priceChanges: ScreenerResult['priceChanges'] = {},
 ): ScreenerResult | null {
   const confirmedCandles = candles.filter((candle) => candle.confirmed)
   const minimumCandles = Math.max(
@@ -196,53 +225,9 @@ export function buildResult(
     crossSlopeQualified,
     priceCrossedFastMa,
   } as const
-  const isMatch = resolveMatch(config.matchMode, trendFlags)
   const indicators = buildIndicatorSnapshot(confirmedCandles)
   const patternMatches = detectPatterns(confirmedCandles)
-  const aiRecommendation = buildAiRecommendation(
-    {
-      signalKey: '',
-      signature: '',
-      instId: instrument.instId,
-      instFamily: instrument.instFamily,
-      instrumentName: `${instrument.baseCcy}-${instrument.quoteCcy}`,
-      baseCcy: instrument.baseCcy,
-      quoteCcy: instrument.quoteCcy,
-      contractType: 'SWAP',
-      timeframe,
-      timeframeLabel: TIMEFRAME_MAP[timeframe].label,
-      synthetic: Boolean(TIMEFRAME_MAP[timeframe].syntheticFrom),
-      lastPrice: latestCandle.close,
-      fastMa: latestFastMa,
-      slowMa: latestSlowMa,
-      distanceRatio,
-      convergencePct,
-      secondaryFastMa: latestSecondaryFastMa,
-      secondarySlowMa: latestSecondarySlowMa,
-      secondaryDistanceRatio,
-      secondaryConvergencePct,
-      priceVsFastMaPct: ((latestCandle.close - latestFastMa) / latestFastMa) * 100,
-      fastMaSlopePct: calculatePercentSlope(latestFastMa, previousFastMa),
-      crossSlopePct,
-      maTrendDirection,
-      crossedAt: new Date(latestCandle.timestamp).toISOString(),
-      lastClosedTs: latestCandle.timestamp,
-      analysisSource: 'rules',
-      llmSummary: null,
-      isMatch,
-      alertStatus: isMatch ? 'ready' : 'not_matched',
-      indicators,
-      patternMatches,
-      aiRecommendationLabel: null,
-      aiRecommendationReason: null,
-      trendFlags,
-      chart: buildChart(candles, config),
-    },
-    indicators,
-    patternMatches,
-  )
-
-  return {
+  const baseResult: ScreenerResult = {
     signalKey: `${instrument.instId}:${timeframe}:${latestCandle.timestamp}`,
     signature: `${instrument.instId}:${timeframe}`,
     instId: instrument.instId,
@@ -271,17 +256,39 @@ export function buildResult(
     lastClosedTs: latestCandle.timestamp,
     analysisSource: 'rules',
     llmSummary: null,
-    isMatch,
-    alertStatus: isMatch ? 'ready' : 'not_matched',
+    isMatch: false,
+    alertStatus: 'not_matched',
     indicators,
     patternMatches,
-    aiRecommendationLabel: aiRecommendation.label,
-    aiRecommendationReason: aiRecommendation.reason,
-    priceChanges: {},
+    aiRecommendationLabel: null,
+    aiRecommendationReason: null,
+    priceChanges,
     marketCap: null,
     watchlisted: false,
     trendFlags,
     chart: buildChart(candles, config),
+  }
+  const baseMatch = resolveMatch(config.matchMode, trendFlags)
+  const extraConditionsMatched =
+    config.extraConditions.length === 0 ||
+    evaluateConditions(baseResult, indicators, config.extraConditions, patternMatches)
+  const isMatch = baseMatch && extraConditionsMatched
+  const aiRecommendation = buildAiRecommendation(
+    {
+      ...baseResult,
+      isMatch,
+      alertStatus: isMatch ? 'ready' : 'not_matched',
+    },
+    indicators,
+    patternMatches,
+  )
+
+  return {
+    ...baseResult,
+    isMatch,
+    alertStatus: isMatch ? 'ready' : 'not_matched',
+    aiRecommendationLabel: aiRecommendation.label,
+    aiRecommendationReason: aiRecommendation.reason,
   }
 }
 
@@ -323,7 +330,14 @@ export class ScreenerEngine {
   async run(config: ScreenerConfig): Promise<ScreeningRun> {
     const startedAt = Date.now()
     const instruments = await fetchSwapInstruments()
-    const rawBars = getRawBarsForSelection(config.selectedTimeframes)
+    const rawBars = [...new Set<ApiBar>([
+      ...getRawBarsForSelection(config.selectedTimeframes),
+      '1m',
+      '5m',
+      '1h',
+      '4h',
+      '1d',
+    ])]
     const candleLimit = Math.min(
       Math.max(config.fetchLimit, config.slowMaPeriod + 5, config.chartCandles + 5),
       300,
@@ -342,6 +356,9 @@ export class ScreenerEngine {
           )
 
           const rawMap = Object.fromEntries(rawEntries) as Record<string, RawCandle[]>
+          const priceChanges = buildPriceChanges(
+            rawMap as Partial<Record<ApiBar, RawCandle[]>>,
+          )
 
           return config.selectedTimeframes
             .map((timeframe) => {
@@ -351,7 +368,13 @@ export class ScreenerEngine {
                 ? aggregateCandles(source, timeframe)
                 : source
 
-              return buildResult(instrument, timeframe, timeframeCandles, config)
+              return buildResult(
+                instrument,
+                timeframe,
+                timeframeCandles,
+                config,
+                priceChanges,
+              )
             })
             .filter((result): result is ScreenerResult => result !== null)
         } catch {

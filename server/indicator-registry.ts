@@ -1,6 +1,13 @@
 import type { IndicatorSnapshot } from '../shared/platform-types'
 import type { RawCandle } from './gate'
 
+const SHANGHAI_DAY_FORMATTER = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Asia/Shanghai',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+})
+
 export function calculateSma(values: number[], period: number) {
   const result: Array<number | null> = Array.from({ length: values.length }, () => null)
   let rollingSum = 0
@@ -149,10 +156,39 @@ export function calculateBias(values: number[], period: number) {
   )
 }
 
+function buildTradingDayKey(timestamp: number) {
+  return SHANGHAI_DAY_FORMATTER.format(new Date(timestamp))
+}
+
+export function calculateIntradayAverage(candles: RawCandle[]) {
+  const result: Array<number | null> = Array.from({ length: candles.length }, () => null)
+  let runningTotal = 0
+  let runningCount = 0
+  let currentDayKey = ''
+
+  for (let index = 0; index < candles.length; index += 1) {
+    const candle = candles[index]
+    const nextDayKey = buildTradingDayKey(candle.timestamp)
+
+    if (nextDayKey !== currentDayKey) {
+      currentDayKey = nextDayKey
+      runningTotal = 0
+      runningCount = 0
+    }
+
+    runningTotal += candle.close
+    runningCount += 1
+    result[index] = runningTotal / runningCount
+  }
+
+  return result
+}
+
 export function buildIndicatorSnapshot(candles: RawCandle[]): IndicatorSnapshot {
   const closes = candles.map((item) => item.close)
   const volumes = candles.map((item) => item.volume)
   const movingAveragePeriods = [5, 10, 20, 30, 60, 120]
+  const intradayAverage = calculateIntradayAverage(candles)
   const movingAverages = Object.fromEntries(
     movingAveragePeriods.map((period) => [
       `MA${period}`,
@@ -174,6 +210,7 @@ export function buildIndicatorSnapshot(candles: RawCandle[]): IndicatorSnapshot 
 
   return {
     movingAverages,
+    intradayAverage: intradayAverage[lastIndex] ?? null,
     macd: {
       dif: macd.dif[lastIndex] ?? null,
       dea: macd.dea[lastIndex] ?? null,

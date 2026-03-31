@@ -1,4 +1,4 @@
-import { DEFAULT_CONFIG, EMPTY_STATS, EMPTY_STATUS } from './defaults'
+﻿import { DEFAULT_CONFIG, EMPTY_STATS, EMPTY_STATUS } from './defaults'
 import {
   analyzeMatchWithLlm,
   analyzeOverviewWithLlm,
@@ -22,21 +22,28 @@ import {
   sanitizeConfig,
   type RuntimeState,
 } from './storage'
-import { sendTestWebhookAlert, sendWebhookAlert } from './alerts'
+import {
+  buildPriceChangeAlertMessage,
+  sendTestWebhookAlert,
+  sendWebhookAlert,
+  sendWebhookPriceAlert,
+} from './alerts'
 import { StrategyPresetService } from './strategy-preset-service'
 import { WatchlistService } from './watchlist-service'
 import { TIMEFRAME_MAP, type TimeframeKey } from '../shared/timeframes'
 import type {
   AiOverview,
+  AlertRecord,
   AlertsResponse,
   ChartResponse,
+  LlmHistoryResponse,
   ResultsQuery,
   ResultsResponse,
   RunReason,
   ScreenerConfig,
   ScreenerResult,
   SnapshotPayload,
-  LlmHistoryResponse,
+  StrategyRunState,
   StrategyPresetsResponse,
   UpdateConfigPayload,
   WatchlistResponse,
@@ -53,6 +60,7 @@ function createEmptySnapshot(
     status: EMPTY_STATUS,
     llmAnalysisEnabled: isLlmAnalysisEnabled(),
     aiOverview,
+    recentAlerts: [],
   }
 }
 
@@ -144,9 +152,11 @@ export class ScreenerService {
 
   private runtime: RuntimeState = {
     alertHistory: {},
+    priceAlertHistory: {},
     alertRecords: [],
     llmSummaries: {},
     homeAiOverview: null,
+    strategyRuns: {},
   }
 
   private allResults: ScreenerResult[] = []
@@ -156,6 +166,8 @@ export class ScreenerService {
   private activeRun: Promise<SnapshotPayload> | null = null
 
   private llmTasks = new Map<string, Promise<string | null>>()
+
+  private strategyRuns = new Map<string, Promise<void>>()
 
   private watchlist = new Set<string>()
 
@@ -174,6 +186,10 @@ export class ScreenerService {
     return {
       ...this.snapshot,
       llmAnalysisEnabled: isLlmAnalysisEnabled(),
+      recentAlerts: this.runtime.alertRecords.slice(0, 20),
+      strategyRuns: Object.values(this.runtime.strategyRuns).sort((left, right) =>
+        left.strategyPresetName.localeCompare(right.strategyPresetName, 'zh-CN'),
+      ),
     }
   }
 
@@ -228,6 +244,352 @@ export class ScreenerService {
     return response
   }
 
+  private async resolveEffectiveConfig() {
+    if (!this.config.activeStrategyPresetId) {
+      return this.config
+    }
+
+    const preset = await this.strategyPresetService.getById(
+      this.config.activeStrategyPresetId,
+      this.config.selectedTimeframes,
+    )
+
+    if (!preset) {
+      return this.config
+    }
+
+    return sanitizeConfig({
+      ...this.config,
+      selectedTimeframes: [...preset.selectedTimeframes],
+      extraConditions: preset.conditions.map((condition) => ({
+        ...condition,
+        params: { ...condition.params },
+      })),
+      monitoringEnabled: this.config.monitoringEnabled && preset.autoRun,
+      refreshIntervalMinutes:
+        preset.scheduleIntervalMinutes ?? this.config.refreshIntervalMinutes,
+    })
+  }
+
+  private createConfigFromPreset(preset: Awaited<ReturnType<StrategyPresetService['getById']>>) {
+    if (!preset) {
+      return this.config
+    }
+
+    return sanitizeConfig({
+      ...this.config,
+      activeStrategyPresetId: preset.id,
+      selectedTimeframes: [...preset.selectedTimeframes],
+      extraConditions: preset.conditions.map((condition) => ({
+        ...condition,
+        params: { ...condition.params },
+      })),
+      monitoringEnabled: preset.autoRun,
+      refreshIntervalMinutes:
+        preset.scheduleIntervalMinutes ?? this.config.refreshIntervalMinutes,
+    })
+  }
+
+  private getSignalAlertHistoryKey(
+    signalKey: string,
+    strategyPresetId?: string | null,
+  ) {
+    return `signal:${strategyPresetId ?? 'main'}:${signalKey}`
+  }
+
+  private getPriceAlertHistoryKey(
+    signalKey: string,
+    ruleId: string,
+    strategyPresetId?: string | null,
+  ) {
+    return `price:${strategyPresetId ?? 'main'}:${ruleId}:${signalKey}`
+  }
+
+  private getWindowLabel(window: '1m' | '5m' | '1h' | '4h' | 'today') {
+    if (window === '1m') {
+      return '1分钟'
+    }
+
+    if (window === '5m') {
+      return '5分钟'
+    }
+
+    if (window === '1h') {
+      return '1小时'
+    }
+
+    if (window === '4h') {
+      return '4小时'
+    }
+
+    return '今日'
+  }
+
+  private getDirectionLabel(direction: 'gt' | 'gte' | 'lt' | 'lte') {
+    if (direction === 'gt') {
+      return '大于'
+    }
+
+    if (direction === 'gte') {
+      return '大于等于'
+    }
+
+    if (direction === 'lt') {
+      return '小于'
+    }
+
+    return '小于等于'
+  }
+
+  private compareThreshold(
+    currentValue: number | null | undefined,
+    threshold: number,
+    direction: 'gt' | 'gte' | 'lt' | 'lte',
+  ) {
+    if (currentValue === null || currentValue === undefined) {
+      return false
+    }
+
+    if (direction === 'gt') {
+      return currentValue > threshold
+    }
+
+    if (direction === 'gte') {
+      return currentValue >= threshold
+    }
+
+    if (direction === 'lt') {
+      return currentValue < threshold
+    }
+
+    return currentValue <= threshold
+  }
+
+  private async persistRuntime() {
+    await saveRuntimeState(this.runtime)
+    this.snapshot = {
+      ...this.snapshot,
+      recentAlerts: this.runtime.alertRecords.slice(0, 20),
+    }
+  }
+
+  private async appendAlertRecords(records: AlertRecord[]) {
+    if (records.length === 0) {
+      return
+    }
+
+    this.runtime.alertRecords = [...records, ...this.runtime.alertRecords].slice(0, 500)
+    await this.persistRuntime()
+  }
+
+  private async processSignalAlerts(
+    effectiveConfig: ScreenerConfig,
+    matchedResults: ScreenerResult[],
+    reason: RunReason,
+    strategyContext?: {
+      strategyPresetId?: string | null
+      strategyPresetName?: string | null
+    },
+  ) {
+    const alertsAvailable = effectiveConfig.monitoringEnabled && effectiveConfig.webhookEnabled
+    const sentSignalKeys = new Set<string>()
+    let lastAlertCount = 0
+    let lastAlertedAt = this.snapshot.status.lastAlertedAt
+    let nextMatchedResults = matchedResults.map((item): ScreenerResult => ({
+      ...item,
+      alertStatus: alertsAvailable ? 'ready' : 'disabled',
+    }))
+
+    if (!effectiveConfig.monitoringEnabled) {
+      return {
+        matchedResults: nextMatchedResults,
+        lastAlertCount,
+        lastAlertedAt,
+      }
+    }
+
+    const cooldownMs = effectiveConfig.notificationCooldownMinutes * 60 * 1000
+    const eligibleMatches = nextMatchedResults.filter((match) => {
+      const historyKey = this.getSignalAlertHistoryKey(
+        match.signalKey,
+        strategyContext?.strategyPresetId,
+      )
+      const lastAlert = this.runtime.alertHistory[historyKey]
+
+      if (!effectiveConfig.webhookEnabled) {
+        return false
+      }
+
+      if (!lastAlert) {
+        return true
+      }
+
+      return Date.now() - Date.parse(lastAlert) >= cooldownMs
+    })
+
+    if (reason !== 'manual') {
+      const alertRecords = await sendWebhookAlert(
+        effectiveConfig,
+        eligibleMatches,
+        strategyContext,
+      )
+      lastAlertCount = alertRecords.length
+
+      if (lastAlertCount > 0) {
+        lastAlertedAt = new Date().toISOString()
+
+        for (const record of alertRecords) {
+          sentSignalKeys.add(record.signalKey)
+          this.runtime.alertHistory[
+            this.getSignalAlertHistoryKey(record.signalKey, strategyContext?.strategyPresetId)
+          ] = record.sentAt
+        }
+
+        await this.appendAlertRecords(alertRecords)
+      }
+    }
+
+    nextMatchedResults = nextMatchedResults.map((item): ScreenerResult => {
+      const lastAlert = this.runtime.alertHistory[
+        this.getSignalAlertHistoryKey(item.signalKey, strategyContext?.strategyPresetId)
+      ]
+
+      if (!alertsAvailable) {
+        return { ...item, alertStatus: 'disabled' }
+      }
+
+      if (sentSignalKeys.has(item.signalKey)) {
+        return { ...item, alertStatus: 'sent' }
+      }
+
+      if (!lastAlert) {
+        return { ...item, alertStatus: 'ready' }
+      }
+
+      return {
+        ...item,
+        alertStatus:
+          Date.now() - Date.parse(lastAlert) >= cooldownMs ? 'ready' : 'cooldown',
+      }
+    })
+
+    return {
+      matchedResults: nextMatchedResults,
+      lastAlertCount,
+      lastAlertedAt,
+    }
+  }
+
+  private async processPriceAlerts(
+    effectiveConfig: ScreenerConfig,
+    items: ScreenerResult[],
+    reason: RunReason,
+    strategyContext?: {
+      strategyPresetId?: string | null
+      strategyPresetName?: string | null
+    },
+  ) {
+    if (!effectiveConfig.monitoringEnabled || effectiveConfig.priceAlertRules.length === 0) {
+      return [] as AlertRecord[]
+    }
+
+    const createdRecords: AlertRecord[] = []
+
+    for (const rule of effectiveConfig.priceAlertRules.filter((item) => item.enabled)) {
+      for (const result of items) {
+        const currentValue = result.priceChanges?.[rule.window]
+
+        if (!this.compareThreshold(currentValue, rule.thresholdPct, rule.direction)) {
+          continue
+        }
+
+        const historyKey = this.getPriceAlertHistoryKey(
+          result.signalKey,
+          rule.id,
+          strategyContext?.strategyPresetId,
+        )
+        const lastAlert = this.runtime.priceAlertHistory[historyKey]
+
+        if (
+          lastAlert &&
+          Date.now() - Date.parse(lastAlert) < rule.cooldownMinutes * 60 * 1000
+        ) {
+          continue
+        }
+
+        const windowLabel = this.getWindowLabel(rule.window)
+        const directionLabel = this.getDirectionLabel(rule.direction)
+        const sentAt = new Date().toISOString()
+
+        let record: AlertRecord | null = null
+
+        if (effectiveConfig.webhookEnabled && reason !== 'manual') {
+          record = await sendWebhookPriceAlert(effectiveConfig, {
+            signalKey: result.signalKey,
+            instId: result.instId,
+            timeframe: result.timeframe,
+            timeframeLabel: result.timeframeLabel,
+            windowLabel,
+            directionLabel,
+            thresholdPct: rule.thresholdPct,
+            priceChangePct: currentValue ?? 0,
+            lastPrice: result.lastPrice,
+            ruleId: rule.id,
+            ruleLabel: rule.label,
+            strategyPresetId: strategyContext?.strategyPresetId,
+            strategyPresetName: strategyContext?.strategyPresetName,
+          })
+        }
+
+        if (!record) {
+          record = {
+            id: `price:${rule.id}:${result.signalKey}:${sentAt}`,
+            signalKey: result.signalKey,
+            instId: result.instId,
+            timeframe: result.timeframe,
+            timeframeLabel: result.timeframeLabel,
+            alertStatus: 'sent',
+            webhookType: effectiveConfig.webhookType,
+            message: buildPriceChangeAlertMessage({
+              instId: result.instId,
+              timeframeLabel: result.timeframeLabel,
+              windowLabel,
+              directionLabel,
+              thresholdPct: rule.thresholdPct,
+              priceChangePct: currentValue ?? 0,
+              lastPrice: result.lastPrice,
+              ruleLabel: rule.label,
+              strategyName: strategyContext?.strategyPresetName ?? null,
+            }),
+            sentAt,
+            category: 'price_change',
+            strategyPresetId: strategyContext?.strategyPresetId ?? null,
+            strategyPresetName: strategyContext?.strategyPresetName ?? null,
+            priceWindowLabel: windowLabel,
+            priceChangePct: currentValue ?? 0,
+          }
+        }
+
+        this.runtime.priceAlertHistory[historyKey] = record.sentAt
+        createdRecords.push(record)
+      }
+    }
+
+    if (createdRecords.length > 0) {
+      await this.appendAlertRecords(createdRecords)
+    }
+
+    return createdRecords
+  }
+
+  private updateStrategyRunState(
+    strategyPresetId: string,
+    updater: (current: StrategyRunState | null) => StrategyRunState,
+  ) {
+    const current = this.runtime.strategyRuns[strategyPresetId] ?? null
+    this.runtime.strategyRuns[strategyPresetId] = updater(current)
+  }
+
   getResults(query: ResultsQuery): ResultsResponse {
     const page = Math.max(1, Number(query.page ?? 1))
     const pageSize = Math.min(100, Math.max(1, Number(query.pageSize ?? 25)))
@@ -238,6 +600,12 @@ export class ScreenerService {
     const keyword = (query.keyword ?? '').trim().toLowerCase()
     const selectedBars = new Set(
       (query.bars ?? '')
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean),
+    )
+    const selectedPatterns = new Set(
+      (query.patterns ?? '')
         .split(',')
         .map((item) => item.trim())
         .filter(Boolean),
@@ -257,6 +625,14 @@ export class ScreenerService {
 
     if (selectedBars.size > 0) {
       items = items.filter((item) => selectedBars.has(item.timeframe))
+    }
+
+    if (selectedPatterns.size > 0) {
+      items = items.filter((item) =>
+        (item.patternMatches ?? []).some(
+          (pattern) => pattern.matched && selectedPatterns.has(pattern.key),
+        ),
+      )
     }
 
     items.sort((left, right) =>
@@ -328,9 +704,10 @@ export class ScreenerService {
   private async executeRun(reason: RunReason) {
     const startedAt = new Date().toISOString()
     const previousMatchedResults = this.snapshot.results
+    const effectiveConfig = await this.resolveEffectiveConfig()
     this.snapshot = {
       ...this.snapshot,
-      config: this.config,
+      config: effectiveConfig,
       status: {
         ...this.snapshot.status,
         isRunning: true,
@@ -341,78 +718,28 @@ export class ScreenerService {
     }
 
     try {
-      const result = await this.engine.run(this.config)
+      const result = await this.engine.run(effectiveConfig)
       const completedAt = new Date().toISOString()
-      let lastAlertCount = 0
-      let lastAlertedAt = this.snapshot.status.lastAlertedAt
-      const alertsAvailable =
-        this.config.monitoringEnabled && this.config.webhookEnabled
-      const sentSignalKeys = new Set<string>()
       let matchedResults: ScreenerResult[] = result.matchedResults.map(
-        (item): ScreenerResult => ({
-          ...this.applyCachedLlmSummary(item),
-          alertStatus: alertsAvailable ? 'ready' : 'disabled',
-        }),
+        (item): ScreenerResult => this.applyCachedLlmSummary(item),
       )
-
-      if (this.config.monitoringEnabled) {
-        const cooldownMs = this.config.notificationCooldownMinutes * 60 * 1000
-        const eligibleMatches = matchedResults.filter((match) => {
-          const lastAlert = this.runtime.alertHistory[match.signalKey]
-
-          if (!this.config.webhookEnabled) {
-            return false
-          }
-
-          if (!lastAlert) {
-            return true
-          }
-
-          return Date.now() - Date.parse(lastAlert) >= cooldownMs
-        })
-
-        if (reason !== 'manual') {
-          const alertRecords = await sendWebhookAlert(this.config, eligibleMatches)
-          lastAlertCount = alertRecords.length
-
-          if (lastAlertCount > 0) {
-            lastAlertedAt = completedAt
-            for (const record of alertRecords) {
-              sentSignalKeys.add(record.signalKey)
-              this.runtime.alertHistory[record.signalKey] = completedAt
-            }
-            this.runtime.alertRecords = [
-              ...alertRecords,
-              ...this.runtime.alertRecords,
-            ].slice(0, 300)
-            await saveRuntimeState(this.runtime)
-          }
-        }
-
-        matchedResults = matchedResults.map((item): ScreenerResult => {
-          const lastAlert = this.runtime.alertHistory[item.signalKey]
-
-          if (!alertsAvailable) {
-            return { ...item, alertStatus: 'disabled' }
-          }
-
-          if (sentSignalKeys.has(item.signalKey)) {
-            return { ...item, alertStatus: 'sent' }
-          }
-
-          if (!lastAlert) {
-            return { ...item, alertStatus: 'ready' }
-          }
-
-          return {
-            ...item,
-            alertStatus:
-              Date.now() - Date.parse(lastAlert) >= cooldownMs
-                ? 'ready'
-                : 'cooldown',
-          }
-        })
-      }
+      const signalAlertOutcome = await this.processSignalAlerts(
+        effectiveConfig,
+        matchedResults,
+        reason,
+      )
+      matchedResults = signalAlertOutcome.matchedResults
+      const priceAlertRecords = await this.processPriceAlerts(
+        effectiveConfig,
+        result.allResults.map((item): ScreenerResult => this.applyCachedLlmSummary(item)),
+        reason,
+      )
+      const lastAlertCount =
+        signalAlertOutcome.lastAlertCount + priceAlertRecords.length
+      const lastAlertedAt =
+        lastAlertCount > 0
+          ? completedAt
+          : signalAlertOutcome.lastAlertedAt
 
       this.allResults = await this.enrichResults(
         result.allResults.map((item): ScreenerResult => {
@@ -435,7 +762,7 @@ export class ScreenerService {
       const aiOverview = this.createPendingAiOverview(overviewInput, completedAt)
 
       this.snapshot = {
-        config: this.config,
+        config: effectiveConfig,
         results: matchedResults,
         stats: result.stats,
         status: {
@@ -448,12 +775,13 @@ export class ScreenerService {
           lastError: null,
           lastAlertCount,
           lastAlertedAt,
-          nextScheduledRunAt: this.config.monitoringEnabled
-            ? getNextBoundary(this.config.refreshIntervalMinutes).toISOString()
+          nextScheduledRunAt: effectiveConfig.monitoringEnabled
+            ? getNextBoundary(effectiveConfig.refreshIntervalMinutes).toISOString()
             : null,
         },
         llmAnalysisEnabled: isLlmAnalysisEnabled(),
         aiOverview,
+        recentAlerts: this.runtime.alertRecords.slice(0, 20),
       }
 
       if (isLlmAnalysisEnabled()) {
@@ -473,7 +801,7 @@ export class ScreenerService {
 
       this.snapshot = {
         ...this.snapshot,
-        config: this.config,
+        config: effectiveConfig,
         llmAnalysisEnabled: isLlmAnalysisEnabled(),
         status: {
           ...this.snapshot.status,
@@ -482,8 +810,8 @@ export class ScreenerService {
           lastRunStartedAt: startedAt,
           lastCompletedAt: completedAt,
           lastError: message,
-          nextScheduledRunAt: this.config.monitoringEnabled
-            ? getNextBoundary(this.config.refreshIntervalMinutes).toISOString()
+          nextScheduledRunAt: effectiveConfig.monitoringEnabled
+            ? getNextBoundary(effectiveConfig.refreshIntervalMinutes).toISOString()
             : null,
         },
       }
@@ -678,7 +1006,7 @@ export class ScreenerService {
       totalMatches: currentResults.length,
       newMatches: newMatches.length,
       removedMatches: removedMatches.length,
-      refreshIntervalMinutes: this.config.refreshIntervalMinutes,
+      refreshIntervalMinutes: this.snapshot.config.refreshIntervalMinutes,
       leadingTimeframeLabel: timeframeStats[0]?.label ?? null,
       timeframeStats,
       sampleSignals,
@@ -747,36 +1075,222 @@ export class ScreenerService {
     }
   }
 
+  private async executeStrategyPresetRun(
+    strategyPresetId: string,
+    reason: RunReason,
+  ) {
+    const preset = await this.strategyPresetService.getById(
+      strategyPresetId,
+      this.config.selectedTimeframes,
+    )
+
+    if (!preset || !preset.autoRun) {
+      return
+    }
+
+    const startedAt = new Date().toISOString()
+    this.updateStrategyRunState(strategyPresetId, (current) => ({
+      strategyPresetId,
+      strategyPresetName: preset.name,
+      nextScheduledRunAt: current?.nextScheduledRunAt ?? null,
+      lastRunStartedAt: startedAt,
+      lastCompletedAt: current?.lastCompletedAt ?? null,
+      lastSuccessfulAt: current?.lastSuccessfulAt ?? null,
+      lastError: null,
+      lastMatchCount: current?.lastMatchCount ?? 0,
+    }))
+    await this.persistRuntime()
+
+    const effectiveConfig = this.createConfigFromPreset(preset)
+
+    try {
+      const result = await this.engine.run(effectiveConfig)
+      const completedAt = new Date().toISOString()
+      const hydratedAllResults = result.allResults.map((item): ScreenerResult =>
+        this.applyCachedLlmSummary(item),
+      )
+      const signalAlertOutcome = await this.processSignalAlerts(
+        effectiveConfig,
+        result.matchedResults.map((item): ScreenerResult => this.applyCachedLlmSummary(item)),
+        reason,
+        {
+          strategyPresetId: preset.id,
+          strategyPresetName: preset.name,
+        },
+      )
+      const priceAlertRecords = await this.processPriceAlerts(
+        effectiveConfig,
+        hydratedAllResults,
+        reason,
+        {
+          strategyPresetId: preset.id,
+          strategyPresetName: preset.name,
+        },
+      )
+
+      this.updateStrategyRunState(strategyPresetId, (current) => ({
+        strategyPresetId,
+        strategyPresetName: preset.name,
+        nextScheduledRunAt: getNextBoundary(
+          effectiveConfig.refreshIntervalMinutes,
+        ).toISOString(),
+        lastRunStartedAt: current?.lastRunStartedAt ?? startedAt,
+        lastCompletedAt: completedAt,
+        lastSuccessfulAt: completedAt,
+        lastError: null,
+        lastMatchCount:
+          signalAlertOutcome.matchedResults.length + priceAlertRecords.length,
+      }))
+      await this.persistRuntime()
+    } catch (error) {
+      const completedAt = new Date().toISOString()
+      this.updateStrategyRunState(strategyPresetId, (current) => ({
+        strategyPresetId,
+        strategyPresetName: preset.name,
+        nextScheduledRunAt: getNextBoundary(
+          effectiveConfig.refreshIntervalMinutes,
+        ).toISOString(),
+        lastRunStartedAt: current?.lastRunStartedAt ?? startedAt,
+        lastCompletedAt: completedAt,
+        lastSuccessfulAt: current?.lastSuccessfulAt ?? null,
+        lastError: error instanceof Error ? error.message : '策略调度执行失败',
+        lastMatchCount: current?.lastMatchCount ?? 0,
+      }))
+      await this.persistRuntime()
+    }
+  }
+
+  private async runPresetIfNeeded(strategyPresetId: string, reason: RunReason) {
+    const existingRun = this.strategyRuns.get(strategyPresetId)
+
+    if (existingRun) {
+      return existingRun
+    }
+
+    const nextRun = this.executeStrategyPresetRun(strategyPresetId, reason).finally(() => {
+      this.strategyRuns.delete(strategyPresetId)
+    })
+
+    this.strategyRuns.set(strategyPresetId, nextRun)
+    return nextRun
+  }
+
+  private async listScheduleCandidates() {
+    const candidates: Array<{
+      id: string
+      kind: 'main' | 'preset'
+      name: string
+      intervalMinutes: number
+      nextRunAt: string
+    }> = []
+
+    if (!this.config.monitoringEnabled) {
+      return candidates
+    }
+
+    candidates.push({
+      id: 'main',
+      kind: 'main',
+      name: this.config.activeStrategyPresetId ? '当前激活策略' : '主筛选任务',
+      intervalMinutes: this.snapshot.config.refreshIntervalMinutes,
+      nextRunAt:
+        this.snapshot.status.nextScheduledRunAt ??
+        getNextBoundary(this.snapshot.config.refreshIntervalMinutes).toISOString(),
+    })
+
+    const presets = await this.strategyPresetService.list(this.config.selectedTimeframes)
+    for (const preset of presets) {
+      if (!preset.autoRun) {
+        continue
+      }
+
+      if (preset.id === this.config.activeStrategyPresetId) {
+        continue
+      }
+
+      if (!this.config.activeStrategyPresetId && preset.id === 'default-ma-strategy') {
+        continue
+      }
+
+      const intervalMinutes =
+        preset.scheduleIntervalMinutes ?? this.config.refreshIntervalMinutes
+      const runtimeState = this.runtime.strategyRuns[preset.id]
+
+      candidates.push({
+        id: preset.id,
+        kind: 'preset',
+        name: preset.name,
+        intervalMinutes,
+        nextRunAt:
+          runtimeState?.nextScheduledRunAt ??
+          getNextBoundary(intervalMinutes).toISOString(),
+      })
+    }
+
+    return candidates
+  }
+
+  private async runDueSchedules() {
+    const now = Date.now()
+    const candidates = await this.listScheduleCandidates()
+    const dueCandidates = candidates.filter(
+      (candidate) => Date.parse(candidate.nextRunAt) <= now + 1_000,
+    )
+
+    if (dueCandidates.length === 0) {
+      this.scheduleNext()
+      return
+    }
+
+    await Promise.allSettled(
+      dueCandidates.map((candidate) =>
+        candidate.kind === 'main'
+          ? this.run('scheduled')
+          : this.runPresetIfNeeded(candidate.id, 'scheduled'),
+      ),
+    )
+
+    this.scheduleNext()
+  }
+
   private scheduleNext() {
     if (this.scheduledTimer) {
       clearTimeout(this.scheduledTimer)
       this.scheduledTimer = null
     }
 
-    if (!this.config.monitoringEnabled) {
+    void (async () => {
+      const candidates = await this.listScheduleCandidates()
+
+      if (candidates.length === 0) {
+        this.snapshot = {
+          ...this.snapshot,
+          status: {
+            ...this.snapshot.status,
+            nextScheduledRunAt: null,
+          },
+        }
+        return
+      }
+
+      const nextCandidate = [...candidates].sort(
+        (left, right) => Date.parse(left.nextRunAt) - Date.parse(right.nextRunAt),
+      )[0]
+      const delay = Math.max(Date.parse(nextCandidate.nextRunAt) - Date.now(), 5_000)
+
       this.snapshot = {
         ...this.snapshot,
         status: {
           ...this.snapshot.status,
-          nextScheduledRunAt: null,
+          nextScheduledRunAt: nextCandidate.nextRunAt,
         },
       }
-      return
-    }
 
-    const nextRun = getNextBoundary(this.config.refreshIntervalMinutes)
-    const delay = Math.max(nextRun.getTime() - Date.now(), 5_000)
-
-    this.snapshot = {
-      ...this.snapshot,
-      status: {
-        ...this.snapshot.status,
-        nextScheduledRunAt: nextRun.toISOString(),
-      },
-    }
-
-    this.scheduledTimer = setTimeout(() => {
-      void this.run('scheduled')
-    }, delay)
+      this.scheduledTimer = setTimeout(() => {
+        void this.runDueSchedules()
+      }, delay)
+    })()
   }
 }
+
+

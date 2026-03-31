@@ -28,6 +28,10 @@ const baseConfig: ScreenerConfig = {
   matchMode: 'A_B_C',
   fetchLimit: 20,
   chartCandles: 5,
+  activeStrategyPresetId: null,
+  extraConditions: [],
+  priceAlertRules: [],
+  soundAlertsEnabled: false,
   monitoringEnabled: true,
   refreshIntervalMinutes: 15,
   notificationCooldownMinutes: 60,
@@ -358,7 +362,7 @@ test('createRuleBasedOverview summarizes scan changes for the homepage card', ()
     removedSignalSamples: ['SOL-USDT-SWAP 1H'],
   })
 
-  assert.match(summary, /本轮共命中 12 条/)
+  assert.match(summary, /本轮命中 12 条/)
   assert.match(summary, /新增 4 条/)
   assert.match(summary, /15m/)
   assert.match(summary, /BTC-USDT-SWAP 15m/)

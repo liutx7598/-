@@ -2,7 +2,12 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { DEFAULT_CONFIG } from './defaults'
-import type { AiOverview, AlertRecord, ScreenerConfig } from '../shared/types'
+import type {
+  AiOverview,
+  AlertRecord,
+  ScreenerConfig,
+  StrategyRunState,
+} from '../shared/types'
 
 export interface LlmSummaryRecord {
   summary: string
@@ -11,9 +16,11 @@ export interface LlmSummaryRecord {
 
 export interface RuntimeState {
   alertHistory: Record<string, string>
+  priceAlertHistory: Record<string, string>
   alertRecords: AlertRecord[]
   llmSummaries: Record<string, LlmSummaryRecord>
   homeAiOverview: AiOverview | null
+  strategyRuns: Record<string, StrategyRunState>
 }
 
 const dataDirectory = path.join(process.cwd(), 'server', 'data')
@@ -56,6 +63,46 @@ export function sanitizeConfig(
     matchMode: next.matchMode,
     fetchLimit: clampNumber(Math.round(next.fetchLimit), 60, 300),
     chartCandles: clampNumber(Math.round(next.chartCandles), 24, 120),
+    activeStrategyPresetId:
+      typeof next.activeStrategyPresetId === 'string' &&
+      next.activeStrategyPresetId.trim().length > 0
+        ? next.activeStrategyPresetId.trim()
+        : null,
+    extraConditions: Array.isArray(next.extraConditions)
+      ? next.extraConditions.map((condition) => ({
+          ...condition,
+          params: { ...condition.params },
+        }))
+      : [],
+    priceAlertRules: Array.isArray(next.priceAlertRules)
+      ? next.priceAlertRules.map((rule, index) => ({
+          id: String(rule.id ?? `price-alert-${index + 1}`),
+          label: String(rule.label ?? ''),
+          window:
+            rule.window === '1m' ||
+            rule.window === '5m' ||
+            rule.window === '1h' ||
+            rule.window === '4h' ||
+            rule.window === 'today'
+              ? rule.window
+              : '1h',
+          direction:
+            rule.direction === 'gt' ||
+            rule.direction === 'gte' ||
+            rule.direction === 'lt' ||
+            rule.direction === 'lte'
+              ? rule.direction
+              : 'gt',
+          thresholdPct: clampNumber(Number(rule.thresholdPct ?? 0), 0.1, 99),
+          enabled: Boolean(rule.enabled),
+          cooldownMinutes: clampNumber(
+            Math.round(Number(rule.cooldownMinutes ?? 30)),
+            1,
+            1440,
+          ),
+        }))
+      : [],
+    soundAlertsEnabled: Boolean(next.soundAlertsEnabled),
     monitoringEnabled: Boolean(next.monitoringEnabled),
     refreshIntervalMinutes: clampNumber(
       Math.round(next.refreshIntervalMinutes),
@@ -106,9 +153,19 @@ export async function loadRuntimeState(): Promise<RuntimeState> {
   const runtime = await readJsonFile<RuntimeState>(runtimeFilePath)
   return {
     alertHistory: runtime?.alertHistory ?? {},
-    alertRecords: runtime?.alertRecords ?? [],
+    priceAlertHistory: runtime?.priceAlertHistory ?? {},
+    alertRecords: (runtime?.alertRecords ?? []).map((record, index) => ({
+      ...record,
+      id: record.id ?? `${record.signalKey}:${record.sentAt}:${index}`,
+      category: record.category ?? 'signal_match',
+      strategyPresetId: record.strategyPresetId ?? null,
+      strategyPresetName: record.strategyPresetName ?? null,
+      priceWindowLabel: record.priceWindowLabel ?? null,
+      priceChangePct: record.priceChangePct ?? null,
+    })),
     llmSummaries: runtime?.llmSummaries ?? {},
     homeAiOverview: runtime?.homeAiOverview ?? null,
+    strategyRuns: runtime?.strategyRuns ?? {},
   }
 }
 

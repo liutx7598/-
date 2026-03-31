@@ -8,7 +8,7 @@
     "dev:client": "vite",
     "dev:server": "tsx watch server/index.ts",
     "build": "tsc -b && vite build",
-    "test": "node --import tsx --test server/okx.test.ts server/screener.test.ts server/llm-history.test.ts",
+    "test": "node --import tsx --test server/okx.test.ts server/pattern-detector.test.ts server/screener.test.ts server/condition-evaluator.test.ts server/llm-history.test.ts server/llm.test.ts",
     "start": "tsx server/index.ts",
     "lint": "eslint .",
     "preview": "vite preview"

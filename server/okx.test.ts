@@ -29,12 +29,13 @@ function createRawCandle(
 }
 
 test('getRawBarsForSelection deduplicates API bars for synthetic timeframes', () => {
-  const bars = getRawBarsForSelection(['15m', '1H', '3H', '4H', '3H'])
-  assert.deepEqual(bars, ['15m', '1h', '4h'])
+  const bars = getRawBarsForSelection(['intraday', '1m', '15m', '1H', '3H', '4H', '3H'])
+  assert.deepEqual(bars, ['1m', '15m', '1h', '4h'])
 })
 
 test('aggregateCandles returns original data for non-synthetic timeframe', () => {
   const candles = [createRawCandle(9, 10), createRawCandle(10, 11)]
+  assert.deepEqual(aggregateCandles(candles, 'intraday'), candles)
   assert.deepEqual(aggregateCandles(candles, '1H'), candles)
 })
 

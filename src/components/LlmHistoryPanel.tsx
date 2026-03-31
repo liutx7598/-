@@ -76,8 +76,8 @@ export function LlmHistoryPanel() {
           <p className="eyebrow">LLM History</p>
           <h2>历史 AI 分析记录</h2>
           <p className="history-subtitle">
-            这里集中展示系统已经落盘的 Qwen / LLM 历史分析，包括首页 15 分钟总览和单个币种信号摘要。
-            你不用再翻文件夹，直接在页面里就能按类型和关键词查看。
+            这里集中展示已经落盘保存的 Qwen / LLM 历史分析，包括首页 15 分钟总览和单个币种的信号摘要。
+            不需要再翻文件夹，直接在页面里按类型和关键词查看即可。
           </p>
         </div>
 
@@ -196,7 +196,7 @@ export function LlmHistoryPanel() {
               </div>
 
               <div className="history-summary-card">
-                <p>{selectedItem.summary || '这条记录没有摘要，下面保留了完整 markdown 文本。'}</p>
+                <p>{selectedItem.summary || '这条记录没有摘要，下方保留了完整 Markdown 文本。'}</p>
               </div>
 
               <pre className="history-markdown">{selectedItem.markdown}</pre>

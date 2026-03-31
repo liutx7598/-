@@ -71,6 +71,15 @@ function normalizeRealtimeInterval(timeframe: TimeframeKey) {
   return definition.apiBar
 }
 
+function intervalToTimeframes(interval: string) {
+  return Object.entries(TIMEFRAME_MAP)
+    .filter(
+      ([, definition]) => definition.apiBar === interval && !definition.syntheticFrom,
+    )
+    .sort((left, right) => left[1].sortOrder - right[1].sortOrder)
+    .map(([key]) => key as TimeframeKey)
+}
+
 function intervalToTimeframe(interval: string) {
   const match = Object.entries(TIMEFRAME_MAP).find(
     ([, definition]) => definition.apiBar === interval && !definition.syntheticFrom,
@@ -183,16 +192,16 @@ function parseCandleUpdates(payload: GateRealtimeEnvelope) {
           c?: string | number
         },
     )
-    .map((entry): CandleUpdate | null => {
+    .flatMap((entry): CandleUpdate[] => {
       const marker = parseCandleMarker(entry.n ?? '')
-      const timeframe = marker ? intervalToTimeframe(marker.interval) : null
       const timestamp = Number(entry.t) * 1000
+      const timeframes = marker ? intervalToTimeframes(marker.interval) : []
 
-      if (!marker || !timeframe) {
-        return null
+      if (!marker || timeframes.length === 0) {
+        return []
       }
 
-      return {
+      return timeframes.map((timeframe) => ({
         instId: marker.instId,
         timeframe,
         candle: {
@@ -205,13 +214,9 @@ function parseCandleUpdates(payload: GateRealtimeEnvelope) {
           fastMa: null,
           slowMa: null,
         } satisfies ChartCandle,
-      }
+      }))
     })
     .filter((entry): entry is CandleUpdate => {
-      if (!entry) {
-        return false
-      }
-
       return (
         entry.instId.length > 0 &&
         Number.isFinite(entry.candle.close) &&

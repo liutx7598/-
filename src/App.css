@@ -1,4 +1,4 @@
-.app-shell {
+﻿.app-shell {
   min-height: 100vh;
   padding: 32px;
   box-sizing: border-box;
@@ -134,6 +134,38 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
   margin-top: 24px;
+}
+
+.watchlist-strip {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 18px 20px;
+  border-radius: 22px;
+  background: rgba(10, 18, 23, 0.68);
+  border: 1px solid rgba(121, 165, 156, 0.12);
+}
+
+.watchlist-strip-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.watchlist-strip-header small {
+  color: var(--text-muted);
+}
+
+.watchlist-strip-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.watchlist-empty {
+  color: var(--text-muted);
 }
 
 .ai-overview-panel {
@@ -419,6 +451,33 @@
   gap: 12px;
   flex-wrap: wrap;
   align-items: center;
+}
+
+.active-filter-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 14px;
+  color: var(--text-muted);
+}
+
+.active-filter-row .chip-grid {
+  align-items: center;
+}
+
+.active-filter-row .chip {
+  white-space: nowrap;
+}
+
+.field:has(#patterns) .note-line {
+  font-size: 0;
+}
+
+.field:has(#patterns) .note-line::before {
+  content: '可多选，用于在已经筛出的信号里继续按形态细分过滤。';
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
 .result-toolbar p,
@@ -927,4 +986,68 @@
   .page-nav {
     flex-direction: column;
   }
+}
+
+
+.strategy-run-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.strategy-run-card,
+.condition-card,
+.alert-feed-item {
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(123, 168, 160, 0.12);
+}
+
+.strategy-run-card {
+  display: grid;
+  gap: 8px;
+}
+
+.strategy-run-card strong,
+.condition-card-header strong,
+.alert-feed-item strong {
+  color: #f4f8f6;
+}
+
+.strategy-run-card small,
+.alert-feed-item small {
+  color: var(--text-muted);
+}
+
+.condition-list {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.condition-card {
+  display: grid;
+  gap: 12px;
+}
+
+.condition-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: start;
+}
+
+.alert-feed {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.alert-feed-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
 }

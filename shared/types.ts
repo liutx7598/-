@@ -1,6 +1,7 @@
 import type { TimeframeKey } from './timeframes'
 import type {
   AiRecommendationLabel,
+  ConditionDefinition,
   IndicatorSnapshot,
   MarketCapSnapshot,
   PatternMatch,
@@ -36,6 +37,10 @@ export interface ScreenerConfig {
   matchMode: MatchMode
   fetchLimit: number
   chartCandles: number
+  activeStrategyPresetId: string | null
+  extraConditions: ConditionDefinition[]
+  priceAlertRules: PriceChangeAlertRule[]
+  soundAlertsEnabled: boolean
   monitoringEnabled: boolean
   refreshIntervalMinutes: number
   notificationCooldownMinutes: number
@@ -129,6 +134,7 @@ export interface MonitorStatus {
 }
 
 export interface AlertRecord {
+  id: string
   signalKey: string
   instId: string
   timeframe: TimeframeKey
@@ -137,6 +143,22 @@ export interface AlertRecord {
   webhookType: WebhookType
   message: string
   sentAt: string
+  category?: 'signal_match' | 'price_change'
+  strategyPresetId?: string | null
+  strategyPresetName?: string | null
+  priceWindowLabel?: string | null
+  priceChangePct?: number | null
+}
+
+export interface StrategyRunState {
+  strategyPresetId: string
+  strategyPresetName: string
+  nextScheduledRunAt: string | null
+  lastRunStartedAt: string | null
+  lastCompletedAt: string | null
+  lastSuccessfulAt: string | null
+  lastError: string | null
+  lastMatchCount: number
 }
 
 export type AiOverviewStatus = 'disabled' | 'pending' | 'ready' | 'error'
@@ -176,6 +198,8 @@ export interface SnapshotPayload {
   status: MonitorStatus
   llmAnalysisEnabled: boolean
   aiOverview: AiOverview | null
+  recentAlerts: AlertRecord[]
+  strategyRuns?: StrategyRunState[]
 }
 
 export interface ResultsQuery {
@@ -183,6 +207,7 @@ export interface ResultsQuery {
   pageSize?: number
   keyword?: string
   bars?: string
+  patterns?: string
   onlyMatched?: boolean
   sortBy?:
     | 'instId'

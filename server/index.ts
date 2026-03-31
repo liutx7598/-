@@ -39,6 +39,8 @@ async function main() {
         pageSize: Number(request.query.pageSize ?? 25),
         keyword: typeof request.query.keyword === 'string' ? request.query.keyword : '',
         bars: typeof request.query.bars === 'string' ? request.query.bars : '',
+        patterns:
+          typeof request.query.patterns === 'string' ? request.query.patterns : '',
         onlyMatched:
           request.query.onlyMatched === undefined
             ? true

@@ -152,13 +152,13 @@ function buildOverviewMarkdown(overview: AiOverview, model: string) {
   const timeframeLines =
     overview.timeframeStats.length > 0
       ? overview.timeframeStats.map((item) => `- ${item.label}: ${item.count}`).join('\n')
-      : '- 无'
+      : '- 暂无'
   const signalLines =
     overview.sampleSignals.length > 0
       ? overview.sampleSignals
           .map((item) => `- ${item.instId} · ${item.timeframeLabel}`)
           .join('\n')
-      : '- 无'
+      : '- 暂无'
 
   return `
 # LLM 首页总览记录
@@ -170,13 +170,13 @@ function buildOverviewMarkdown(overview: AiOverview, model: string) {
 - 模型: ${model}
 - 命中数: ${overview.totalMatches}
 - 新增数: ${overview.newMatches}
-- 消失数: ${overview.removedMatches}
-- 主导周期: ${overview.leadingTimeframeLabel ?? '无'}
+- 移除数: ${overview.removedMatches}
+- 主导周期: ${overview.leadingTimeframeLabel ?? '暂无'}
 - 错误: ${overview.error ?? '无'}
 
 ## 摘要
 
-${overview.summary ?? '无'}
+${overview.summary ?? '暂无'}
 
 ## 周期分布
 

@@ -1,4 +1,4 @@
-import path from 'node:path'
+﻿import path from 'node:path'
 import { randomUUID } from 'node:crypto'
 
 import type { ConditionDefinition, StrategyPreset } from '../shared/platform-types'
@@ -24,14 +24,14 @@ export function createDefaultConditions(): ConditionDefinition[] {
       label: 'MA5 抬头向上',
       kind: 'ma_trend',
       enabled: true,
-      params: { direction: 'up' },
+      params: { period: 5, direction: 'up' },
     },
     {
       id: 'price-cross-ma5',
-      label: 'K 线上穿 MA5',
+      label: 'K 线实体上穿 MA5',
       kind: 'price_cross_ma',
       enabled: true,
-      params: { direction: 'up' },
+      params: { period: 5, direction: 'up' },
     },
   ]
 }
@@ -41,7 +41,7 @@ export function createDefaultStrategy(selectedTimeframes: TimeframeKey[]): Strat
   return {
     id: 'default-ma-strategy',
     name: '默认均线收拢策略',
-    description: '兼容当前 MA5/MA20 收拢 + MA5 抬头 + 上穿 MA5 的基线逻辑',
+    description: '兼容当前 MA5/MA20 收拢 + MA5 抬头 + K 线实体上穿 MA5 的基线逻辑',
     favorite: true,
     autoRun: true,
     scheduleIntervalMinutes: 15,
@@ -58,8 +58,14 @@ export class StrategyPresetService {
     return presets.length > 0 ? presets : [createDefaultStrategy(selectedTimeframes)]
   }
 
+  async getById(id: string, selectedTimeframes: TimeframeKey[]) {
+    const presets = await this.list(selectedTimeframes)
+    return presets.find((item) => item.id === id) ?? null
+  }
+
   async upsert(
-    payload: Partial<StrategyPreset> & Pick<StrategyPreset, 'name' | 'conditions' | 'selectedTimeframes'>,
+    payload: Partial<StrategyPreset> &
+      Pick<StrategyPreset, 'name' | 'conditions' | 'selectedTimeframes'>,
   ) {
     const presets = await strategyStore.load()
     const timestamp = new Date().toISOString()
